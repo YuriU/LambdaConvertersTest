@@ -1,9 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-
 using Amazon.Lambda.Core;
+using Amazon.Lambda.S3Events;
 
 // Assembly attribute to enable the Lambda function's JSON input to be converted into a .NET class.
 [assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer))]
@@ -19,11 +16,14 @@ namespace Dummy.Converter
         /// <param name="input"></param>
         /// <param name="context"></param>
         /// <returns></returns>
-        public Casing FunctionHandler(string input, ILambdaContext context)
+        public async Task FunctionHandler(S3Event @event, ILambdaContext context)
         {
-            return new Casing(input?.ToLower(), input?.ToUpper());
+            LambdaLogger.Log("Event handler started");
+            foreach (var record in @event.Records)
+            {
+                
+            }
+            LambdaLogger.Log("Event handler completed");
         }
     }
-
-    public record Casing(string Lower, string Upper);
 }
