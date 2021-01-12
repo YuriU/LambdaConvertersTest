@@ -33,7 +33,7 @@ functions:
   hello:
     handler: CsharpHandlers::AwsDotnetCsharp.Handler::Hello
     environment:
-      FANOUT_TOPIC_ARN: { Ref: FileUploadedTopic }
+      FILE_UPLOADED_TOPIC_ARN: { Ref: FileUploadedTopic }
     package:
       artifact: bin/Release/netcoreapp3.1/hello.zip
     events:
