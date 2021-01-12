@@ -3,6 +3,7 @@ using System.Collections;
 using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Threading;
 using System.Threading.Tasks;
 using Amazon.Lambda.Core;
 using Amazon.Lambda.S3Events;
@@ -38,9 +39,10 @@ namespace Dummy.Converter
             
             LambdaLogger.Log("Event handler started");
             
+            var tokenSource = new CancellationTokenSource();
             foreach (var record in @event.Records)
             {
-               var filePath = await DownloadFile(record.S3.Bucket.Name, record.S3.Object.Key);
+               var filePath = await DownloadFile(record.S3.Bucket.Name, record.S3.Object.Key, tokenSource.Token);
                
                File.Delete(filePath);
             }
@@ -48,7 +50,7 @@ namespace Dummy.Converter
             LambdaLogger.Log("Event handler completed");
         }
 
-        private static async Task<string> DownloadFile(string bucketName, string key)
+        private static async Task<string> DownloadFile(string bucketName, string key, CancellationToken cancellationToken)
         {
             var request = new GetObjectRequest
             {
@@ -59,22 +61,13 @@ namespace Dummy.Converter
             var tempPath= Path.GetTempPath();
             var extension = Path.GetExtension(key);
             var tempFileName = Guid.NewGuid().ToString();
-            var filePath = Path.Combine(tempPath, $"{tempFileName}.{extension}");
-
-            const int bufferSize = 1024 * 1024 * 10;
-            byte[] buffer = new byte[ bufferSize ];
+            var filePath = Path.Combine(tempPath, $"{tempFileName}{extension}");
             
             LambdaLogger.Log($"Downloading {key} to {filePath}");
-            
-            using (GetObjectResponse getObjectResponse = await S3Client.GetObjectAsync(request))
-            using (var fileStream = File.Open(filePath, FileMode.Create))
+
+            using (GetObjectResponse response = await S3Client.GetObjectAsync(request))
             {
-                var bytesRead = await getObjectResponse.ResponseStream.ReadAsync(buffer, 0, bufferSize);
-                while (bytesRead > 0)
-                {
-                    await fileStream.WriteAsync(buffer, 0, bytesRead);
-                    bytesRead = await getObjectResponse.ResponseStream.ReadAsync(buffer, 0, bufferSize);
-                }
+                await response.WriteResponseStreamToFileAsync(filePath, false, cancellationToken);
             }
             
             LambdaLogger.Log($"Download completed {key} to {filePath}. File size is {new FileInfo(filePath).Length}");
