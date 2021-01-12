@@ -2,6 +2,10 @@ service: testconvertersapp
 
 frameworkVersion: '2'
 
+# npm install serverless-s3-remover
+plugins:
+  - serverless-s3-remover
+
 provider:
   name: aws
   region: eu-central-1
@@ -12,14 +16,30 @@ provider:
 package:
   individually: true
 
+custom:
+  remover:
+     buckets:
+        - { Ref: InputBucket }
+
+
+iamRoleStatements:
+    - Effect: Allow
+      Action:
+      - sns:Publish
+      Resource:
+        - !GetAtt FileUploadedTopic.Arn
+
 functions:
   hello:
     handler: CsharpHandlers::AwsDotnetCsharp.Handler::Hello
+    environment:
+      FANOUT_TOPIC_ARN: { Ref: FileUploadedTopic }
     package:
       artifact: bin/Release/netcoreapp3.1/hello.zip
     events:
       - s3:
           bucket:  { Ref: InputBucket }
+          event: s3:ObjectCreated:*
           existing: true
 
 resources:
@@ -29,3 +49,13 @@ resources:
 
     FileUploadedTopic:
       Type: "AWS::SNS::Topic"
+
+    DummyConverterQueue:
+      Type: "AWS::SQS::Queue"
+
+    DummyQueueSubscription:
+      Type: AWS::SNS::Subscription
+      Properties:
+        Protocol: sqs
+        Endpoint: { "Fn::GetAtt": ["DummyConverterQueue", "Arn"] }
+        TopicArn: { Ref: FileUploadedTopic }
