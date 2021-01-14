@@ -20,3 +20,4 @@ RUN dotnet publish "Converter.csproj" \
 FROM base as final
 WORKDIR /var/task
 COPY --from=publish /app/publish .
+CMD [ "Converter::Dummy.Converter.Function::FunctionHandler" ]

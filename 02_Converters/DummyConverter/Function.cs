@@ -1,12 +1,11 @@
 using System;
-using System.Collections;
 using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using Amazon.Lambda.Core;
-using Amazon.Lambda.S3Events;
+using Amazon.Lambda.SQSEvents;
 using Amazon.S3;
 using Amazon.S3.Model;
 
@@ -25,9 +24,13 @@ namespace Dummy.Converter
         /// <param name="input"></param>
         /// <param name="context"></param>
         /// <returns></returns>
-        public async Task FunctionHandler(S3Event @event, ILambdaContext context)
+        public async Task FunctionHandler(SQSEvent sqsEvent, ILambdaContext context)
         {
-            var variables = Environment.GetEnvironmentVariables();
+            LambdaLogger.Log("Event handler started");
+            LambdaLogger.Log(JsonSerializer.Serialize(sqsEvent));
+            LambdaLogger.Log("Event handler completed");
+            /*var variables = Environment.GetEnvironmentVariables();
+            Environment.GetEnvironmentVariable()
             foreach (DictionaryEntry variable in variables)
             {
                 context.Logger.LogLine($"{variable.Key} = ${variable.Value}");
@@ -47,7 +50,7 @@ namespace Dummy.Converter
                File.Delete(filePath);
             }
             
-            LambdaLogger.Log("Event handler completed");
+            LambdaLogger.Log("Event handler completed");*/
         }
 
         private static async Task<string> DownloadFile(string bucketName, string key, CancellationToken cancellationToken)
