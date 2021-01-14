@@ -42,6 +42,12 @@ functions:
           event: s3:ObjectCreated:*
           existing: true
 
+  DummyConvert:
+    image: <image>
+    events:
+     - sqs:
+         arn: !GetAtt DummyConverterQueue.Arn
+
 resources:
   Resources:
     InputBucket:
@@ -52,7 +58,12 @@ resources:
       Properties:
         TopicName: "testconvertersapp-FileUploaded"
 
-    FileUploadedTopicSqsPolicy:
+    # Dummy Converter Queue subscription & handling
+    DummyConverterQueue:
+      Type: "AWS::SQS::Queue"
+      
+
+    DummyConverterQueuePolicy:
       Type: AWS::SQS::QueuePolicy
       Properties:
         PolicyDocument:
@@ -69,9 +80,6 @@ resources:
                 aws:SourceArn: !Ref FileUploadedTopic
         Queues:
           - !Ref DummyConverterQueue
-      
-    DummyConverterQueue:
-      Type: "AWS::SQS::Queue"
 
     DummyConverterQueueSubscription:
       Type: AWS::SNS::Subscription
