@@ -12,34 +12,52 @@ using Amazon.SimpleNotificationService.Model;
 namespace AwsDotnetCsharp
 {
     public class Handler
-    {
+    { 
         private static AmazonSimpleNotificationServiceClient _snsClient = new AmazonSimpleNotificationServiceClient();
       
-       public async Task Hello(S3Event @event, ILambdaContext context)
-       {
+        public async Task Hello(S3Event @event, ILambdaContext context)
+        {
            var topicArn = Environment.GetEnvironmentVariable("FILE_UPLOADED_TOPIC_ARN");
            LambdaLogger.Log("Event handler started");
            if (@event.Records != null)
            {
                foreach (var record in @event.Records)
                {
-                   var fileUploadedEvent = new
+                   try
                    {
-                       BucketName = record.S3.Bucket,
-                       Key = record.S3.Object.Key
-                   };
-                   
-                   var publishRequest = new PublishRequest
+                       LambdaLogger.Log($"Publishing to {topicArn}");
+                       await PublishFileUploaded(topicArn, record.S3.Bucket.Name, record.S3.Object.Key);
+                   }
+                   catch (Exception e)
                    {
-                       Message = JsonSerializer.Serialize(fileUploadedEvent),
-                       TopicArn = topicArn
-                   };
-
-                   await _snsClient.PublishAsync(publishRequest, CancellationToken.None);
+                       LambdaLogger.Log("Error during publish message");
+                       LambdaLogger.Log(e.ToString());
+                       throw;
+                   }
                }
            }
            
            LambdaLogger.Log("Event handler completed");
+        }
+
+       private async Task PublishFileUploaded(string topic, string bucketName, string key)
+       {
+           LambdaLogger.Log($"Publishing {topic}::{bucketName}::{key}");
+           
+           var fileUploadedEvent = new
+           {
+               BucketName = bucketName,
+               Key = key
+           };
+                   
+           var publishRequest = new PublishRequest
+           {
+               Message = JsonSerializer.Serialize(fileUploadedEvent),
+               TopicArn = topic
+           };
+
+           await _snsClient.PublishAsync(publishRequest, CancellationToken.None)
+               .ConfigureAwait(false);
        }
     }
 }
