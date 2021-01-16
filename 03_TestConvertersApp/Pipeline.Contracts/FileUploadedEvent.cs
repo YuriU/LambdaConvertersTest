@@ -2,6 +2,10 @@
 {
     public class FileUploadedEvent
     {
+        public FileUploadedEvent()
+        {
+        }
+        
         public FileUploadedEvent(string originalBucketName, string key, string resultBucketName)
         {
             OriginalBucketName = originalBucketName;
