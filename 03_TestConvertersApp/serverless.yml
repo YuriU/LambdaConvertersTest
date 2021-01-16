@@ -45,6 +45,8 @@ functions:
 
   CopyOriginalFile:
     handler: Pipeline.CopyOriginalFile::Pipeline.CopyOriginalFile.FileUploadedHandler::OriginalFileUploaded
+    package:
+      artifact: Pipeline.CopyOriginalFile/bin/Release/netcoreapp3.1/Pipeline.CopyOriginalFile.zip
     events:
      - sqs:
          arn: !GetAtt CopyOriginalFileQueue.Arn
