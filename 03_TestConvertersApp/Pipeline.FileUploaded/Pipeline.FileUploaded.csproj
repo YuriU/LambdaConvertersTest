@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
-    <AssemblyName>CsharpHandlers</AssemblyName>
+    <AssemblyName>Pipeline.FileUploaded</AssemblyName>
     <PackageId>aws-csharp</PackageId>
   </PropertyGroup>
 

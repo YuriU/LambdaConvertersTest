@@ -30,23 +30,23 @@ custom:
 
 functions:
   hello:
-    handler: CsharpHandlers::AwsDotnetCsharp.Handler::Hello
+    handler: Pipeline.FileUploaded::Pipeline.FileUploaded.FileUploadedHandler::OriginalFileUploaded
     timeout: 10
     environment:
       FILE_UPLOADED_TOPIC_ARN: { Ref: FileUploadedTopic }
     package:
-      artifact: bin/Release/netcoreapp3.1/hello.zip
+      artifact: Pipeline.FileUploaded/bin/Release/netcoreapp3.1/Pipeline.FileUploaded.zip
     events:
       - s3:
           bucket:  { Ref: InputBucket }
           event: s3:ObjectCreated:*
           existing: true
 
-  DummyConvert:
-    image: <image>
-    events:
-     - sqs:
-         arn: !GetAtt DummyConverterQueue.Arn
+  #DummyConvert:
+  #  image: <image>
+  #  events:
+  #   - sqs:
+  #       arn: !GetAtt DummyConverterQueue.Arn
 
 resources:
   Resources:
