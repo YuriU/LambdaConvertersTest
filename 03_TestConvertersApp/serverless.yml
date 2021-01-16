@@ -21,9 +21,14 @@ provider:
         - { Ref: FileUploadedTopic }
     - Effect: Allow
       Action:
-        - s3:GetObject
+        - s3:*
       Resource:
-        - { "Fn::Join" : [ "/", [{ "Fn::GetAtt" : [OriginalBucket, Arn] }, "*"] ]}
+        - { "Fn::Join" : [ "", [{ "Fn::GetAtt" : [OriginalBucket, Arn] }, "/*"] ]}
+    - Effect: Allow
+      Action:
+        - s3:*
+      Resource:
+        - { "Fn::Join" : [ "", [{ "Fn::GetAtt" : [ResultBucket, Arn] }, "/*"] ]}
   
 package:
   individually: true
