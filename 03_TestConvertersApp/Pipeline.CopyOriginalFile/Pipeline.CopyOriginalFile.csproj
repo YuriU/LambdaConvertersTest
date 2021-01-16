@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netcoreapp3.1</TargetFramework>
+        <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
+        <AssemblyName>Pipeline.CopyOriginalFile</AssemblyName>
+        <PackageId>aws-csharp</PackageId>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Amazon.Lambda.Core" Version="1.2.0" />
+        <PackageReference Include="Amazon.Lambda.Serialization.SystemTextJson" Version="2.0.1" />
+        <PackageReference Include="AWSSDK.SimpleNotificationService" Version="3.5.1.30" />
+        <PackageReference Include="Amazon.Lambda.SQSEvents" Version="1.2.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Pipeline.Contracts\Pipeline.Contracts.csproj" />
+    </ItemGroup>
+
+</Project>

@@ -6,6 +6,7 @@ using Amazon.Lambda.Core;
 using Amazon.Lambda.S3Events;
 using Amazon.SimpleNotificationService;
 using Amazon.SimpleNotificationService.Model;
+using Pipeline.Contracts;
 
 [assembly:LambdaSerializer(typeof(Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer))]
 namespace Pipeline.FileUploaded
@@ -13,6 +14,8 @@ namespace Pipeline.FileUploaded
     public class FileUploadedHandler
     {
         private readonly string _notifyTopicArn = Environment.GetEnvironmentVariable("FILE_UPLOADED_TOPIC_ARN");
+        
+        private readonly string _resultBucketName = Environment.GetEnvironmentVariable("RESULT_BUCKET_NAME");
         
         private static AmazonSimpleNotificationServiceClient _snsClient = new AmazonSimpleNotificationServiceClient();
         
@@ -39,14 +42,8 @@ namespace Pipeline.FileUploaded
         
         private async Task PublishFileUploaded(string topic, string bucketName, string key)
         {
-            LambdaLogger.Log($"Publishing {topic}::{bucketName}::{key}");
-           
-            var fileUploadedEvent = new
-            {
-                BucketName = bucketName,
-                Key = key
-            };
-                   
+            var fileUploadedEvent = new FileUploadedEvent(bucketName, key, _resultBucketName);
+
             var publishRequest = new PublishRequest
             {
                 Message = JsonSerializer.Serialize(fileUploadedEvent),

@@ -26,21 +26,28 @@ package:
 custom:
   remover:
      buckets:
-        - { Ref: InputBucket }
+        - { Ref: OriginalBucket }
 
 functions:
-  hello:
+  FileUploaded:
     handler: Pipeline.FileUploaded::Pipeline.FileUploaded.FileUploadedHandler::OriginalFileUploaded
     timeout: 10
     environment:
       FILE_UPLOADED_TOPIC_ARN: { Ref: FileUploadedTopic }
+      RESULT_BUCKET_NAME: { Ref: ResultBucket }
     package:
       artifact: Pipeline.FileUploaded/bin/Release/netcoreapp3.1/Pipeline.FileUploaded.zip
     events:
       - s3:
-          bucket:  { Ref: InputBucket }
+          bucket:  { Ref: OriginalBucket }
           event: s3:ObjectCreated:*
           existing: true
+
+  CopyOriginalFile:
+    handler: Pipeline.CopyOriginalFile::Pipeline.CopyOriginalFile.FileUploadedHandler::OriginalFileUploaded
+    events:
+     - sqs:
+         arn: !GetAtt CopyOriginalFileQueue.Arn
 
   #DummyConvert:
   #  image: <image>
@@ -50,7 +57,10 @@ functions:
 
 resources:
   Resources:
-    InputBucket:
+    OriginalBucket:
+      Type: "AWS::S3::Bucket"
+
+    ResultBucket:
       Type: "AWS::S3::Bucket"
 
     FileUploadedTopic:
@@ -58,12 +68,11 @@ resources:
       Properties:
         TopicName: "testconvertersapp-FileUploaded"
 
-    # Dummy Converter Queue subscription & handling
-    DummyConverterQueue:
+    # Copy original file queue
+    CopyOriginalFileQueue:
       Type: "AWS::SQS::Queue"
       
-
-    DummyConverterQueuePolicy:
+    CopyOriginalFileQueuePolicy:
       Type: AWS::SQS::QueuePolicy
       Properties:
         PolicyDocument:
@@ -74,18 +83,18 @@ resources:
             Principal: "*"
             Action:
               - sqs:SendMessage
-            Resource: !GetAtt DummyConverterQueue.Arn
+            Resource: !GetAtt CopyOriginalFileQueue.Arn
             Condition:
               ArnEquals:
                 aws:SourceArn: !Ref FileUploadedTopic
         Queues:
-          - !Ref DummyConverterQueue
+          - !Ref CopyOriginalFileQueue
 
-    DummyConverterQueueSubscription:
+    CopyOriginalFileQueueSubscription:
       Type: AWS::SNS::Subscription
       Properties:
         Protocol: sqs
-        Endpoint: !GetAtt DummyConverterQueue.Arn
+        Endpoint: !GetAtt CopyOriginalFileQueue.Arn
         Region: "${self:provider.region}"
         TopicArn: !Ref FileUploadedTopic
         RawMessageDelivery: 'true'
