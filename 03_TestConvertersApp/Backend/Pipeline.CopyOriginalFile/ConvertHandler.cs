@@ -23,8 +23,10 @@ namespace Pipeline.CopyOriginalFile
         private readonly string _resultNotificationQueue = Environment.GetEnvironmentVariable("RESULT_NOTIFICATION_QUEUE");
         
         private readonly string _conversionName = Environment.GetEnvironmentVariable("CONVERSION_NAME");
+        
         public async Task Convert(SQSEvent @event, ILambdaContext context)
         {
+            context.Logger.Log(JsonSerializer.Serialize(@event));
             foreach (var record in @event.Records)
             {
                 var file = JsonSerializer.Deserialize<FileUploadedEvent>(record.Body);
@@ -38,8 +40,13 @@ namespace Pipeline.CopyOriginalFile
             try
             {
                 var tempFilePath = GetTempFilePath(file.Key);
+                
                 await DownloadFile(file.OriginalBucketName, file.Key, tempFilePath);
-                var resultFileKey = $"{_conversionName}/{file.Key}";
+                
+                var resultFileKey = MakeResultFileName(file.ResultBucketUploadFolder, _conversionName, file.Key);
+                
+                context.Logger.Log(resultFileKey);
+
                 await UploadFile(tempFilePath, file.ResultBucketName, resultFileKey);
 
                 result = new FileProcessedEvent(file.Key, resultFileKey, 0l);
@@ -53,6 +60,10 @@ namespace Pipeline.CopyOriginalFile
                 await SqsClient.SendMessageAsync(_resultNotificationQueue, JsonSerializer.Serialize(result),
                     CancellationToken.None);
             }
+        }
+        private static string MakeResultFileName(string uploadResultPath, string conversion, string fileKey)
+        {
+            return $"{uploadResultPath}/{conversion}/Converted{Path.GetExtension(fileKey)}";
         }
 
         private static async Task DownloadFile(string srcBucket, string srcKey, string destFileName)

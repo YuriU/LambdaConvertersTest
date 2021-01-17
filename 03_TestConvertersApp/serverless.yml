@@ -17,11 +17,13 @@ provider:
         - { Ref: FileUploadedTopic }
     - Effect: Allow
       Action:
+        - s3:DeleteObject
         - s3:GetObject
       Resource:
         - { "Fn::Join" : [ "", [{ "Fn::GetAtt" : [OriginalBucket, Arn] }, "/*"] ]}
     - Effect: Allow
       Action:
+        - s3:GetObject
         - s3:PutObject
       Resource:
         - { "Fn::Join" : [ "", [{ "Fn::GetAtt" : [ResultBucket, Arn] }, "/*"] ]}
@@ -30,6 +32,23 @@ provider:
         - sqs:SendMessage
       Resource:
          !GetAtt ResultNotificationQueue.Arn
+    - Effect: Allow
+      Action:
+      - dynamodb:DescribeStream
+      - dynamodb:GetRecords
+      - dynamodb:Scan
+      - dynamodb:GetShardIterator
+      - dynamodb:ListStreams
+      - dynamodb:GetItem
+      - dynamodb:PutItem
+      - dynamodb:Query
+      - dynamodb:BatchWriteItem
+      - dynamodb:UpdateItem
+      Resource:
+        - !GetAtt FilesTable.Arn
+        - { "Fn::Join" : [ "/", [{ "Fn::GetAtt" : [FilesTable, Arn] }, "index/*"] ]}
+        - !GetAtt ConversionJobsTable.Arn
+        - { "Fn::Join" : [ "/", [{ "Fn::GetAtt" : [ConversionJobsTable, Arn] }, "index/*"] ]}
 
 custom:
   stage: ${opt:stage, self:provider.stage}
@@ -40,10 +59,11 @@ package:
 functions:
   FileUploaded:
     handler: Pipeline.FileUploaded::Pipeline.FileUploaded.FileUploadedHandler::OriginalFileUploaded
-    timeout: 10
+    timeout: 15
     environment:
       FILE_UPLOADED_TOPIC_ARN: { Ref: FileUploadedTopic }
       RESULT_BUCKET_NAME: { Ref: ResultBucket }
+      CONVERSION_JOBS_TABLE_NAME: { Ref: ConversionJobsTable }
     package:
       artifact: Backend/Pipeline.FileUploaded/bin/Release/netcoreapp3.1/Pipeline.FileUploaded.zip
     events:
@@ -75,8 +95,11 @@ functions:
 
   GetFilesList:
     handler: Pipeline.GetFilesList::Pipeline.GetFilesList.GetFileListHandler::GetFilesList
+    timeout: 15
     package:
       artifact: Backend/Pipeline.GetFilesList/bin/Release/netcoreapp3.1/Pipeline.GetFilesList.zip
+    environment:
+      FILES_TABLE_NAME: { Ref: FilesTable }
     events:
       - http:
           cors: true
@@ -122,6 +145,32 @@ resources:
 
     ResultNotificationQueue:
       Type: "AWS::SQS::Queue"
+
+    FilesTable:
+      Type: "AWS::DynamoDB::Table"
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: fileName
+            AttributeType: S
+        KeySchema:
+          - AttributeName: fileName
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+
+    ConversionJobsTable:
+      Type: "AWS::DynamoDB::Table"
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
 
     UserPool:
       Type: "AWS::Cognito::UserPool"
