@@ -43,7 +43,7 @@ functions:
       FILE_UPLOADED_TOPIC_ARN: { Ref: FileUploadedTopic }
       RESULT_BUCKET_NAME: { Ref: ResultBucket }
     package:
-      artifact: Pipeline.FileUploaded/bin/Release/netcoreapp3.1/Pipeline.FileUploaded.zip
+      artifact: Backend/Pipeline.FileUploaded/bin/Release/netcoreapp3.1/Pipeline.FileUploaded.zip
     events:
       - s3:
           bucket:  { Ref: OriginalBucket }
@@ -57,7 +57,7 @@ functions:
       RESULT_NOTIFICATION_QUEUE: { Ref: ResultNotificationQueue }
       CONVERSION_NAME: "Original"
     package:
-      artifact: Pipeline.CopyOriginalFile/bin/Release/netcoreapp3.1/Pipeline.CopyOriginalFile.zip
+      artifact: Backend/Pipeline.CopyOriginalFile/bin/Release/netcoreapp3.1/Pipeline.CopyOriginalFile.zip
     events:
      - sqs:
          arn: !GetAtt CopyOriginalFileQueue.Arn
@@ -66,10 +66,24 @@ functions:
     handler: Pipeline.ProcessResult::Pipeline.ProcessResult.ProcessResultHandler::ProcessResult
     timeout: 15
     package:
-      artifact: Pipeline.ProcessResult/bin/Release/netcoreapp3.1/Pipeline.ProcessResult.zip
+      artifact: Backend/Pipeline.ProcessResult/bin/Release/netcoreapp3.1/Pipeline.ProcessResult.zip
     events:
      - sqs:
          arn: !GetAtt ResultNotificationQueue.Arn
+
+  GetFilesList:
+    handler: Pipeline.GetFilesList::Pipeline.GetFilesList.GetFileListHandler::GetFilesList
+    package:
+      artifact: Backend/Pipeline.GetFilesList/bin/Release/netcoreapp3.1/Pipeline.GetFilesList.zip
+    events:
+      - http:
+          cors: true
+          path: /getFilesList
+          method: get
+          authorizer:
+            name: authorizer
+            type: COGNITO_USER_POOLS
+            authorizerId: { Ref: MyApiGatewayAuthorizer }
 
   #DummyConvert:
   #  image: <image>
@@ -98,6 +112,41 @@ resources:
 
     ResultNotificationQueue:
       Type: "AWS::SQS::Queue"
+
+    UserPool:
+      Type: "AWS::Cognito::UserPool"
+      Properties:
+        AdminCreateUserConfig:
+          AllowAdminCreateUserOnly: true
+
+    UserPoolClient:
+      Type: "AWS::Cognito::UserPoolClient"
+      Properties:
+        UserPoolId: !Ref UserPool
+        AllowedOAuthFlowsUserPoolClient: true
+        SupportedIdentityProviders:
+          - "COGNITO"
+        AllowedOAuthFlows:
+          - implicit
+        CallbackURLs:
+          - "http://localhost:8080/"
+        LogoutURLs:
+          - "http://localhost:8080/"
+        AllowedOAuthScopes:
+          - "email"
+          - "openid"
+          - "profile"
+
+    MyApiGatewayAuthorizer: 
+      Type: AWS::ApiGateway::Authorizer
+      Properties: 
+        AuthorizerResultTtlInSeconds: 10
+        IdentitySource: method.request.header.Authorization
+        Name: MyCognitoAuthorizer
+        RestApiId: { Ref: ApiGatewayRestApi }
+        Type: COGNITO_USER_POOLS
+        ProviderARNs: 
+          - !GetAtt 'UserPool.Arn'
 
     # Copy original file queue
     CopyOriginalFileQueue:
