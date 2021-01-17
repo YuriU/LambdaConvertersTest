@@ -19,7 +19,7 @@ HTTP_ENDPOINT=$(aws \
 
 USER_POOL_ID=$(aws \
     cloudformation describe-stacks \
-    --stack-name "scrum-vote-${STAGE}" \
+    --stack-name "testconvertersapp-${STAGE}" \
     --query "Stacks[0].Outputs[?OutputKey=='UserPoolId'] | [0].OutputValue" \
     --output text)
 
