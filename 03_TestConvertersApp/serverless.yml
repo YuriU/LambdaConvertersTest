@@ -31,6 +31,8 @@ provider:
       Resource:
          !GetAtt ResultNotificationQueue.Arn
 
+custom:
+  stage: ${opt:stage, self:provider.stage}
   
 package:
   individually: true
@@ -93,10 +95,18 @@ functions:
 
 resources:
   Outputs:
+    Region:
+      Value: "${self:provider.region}"
     OriginalBucket:
       Value: { Ref: OriginalBucket }
     ResultBucket:
       Value: { Ref: ResultBucket }
+    UserPoolId:
+      Value: !Ref UserPool
+    UserPoolAppClientId:
+      Value: !Ref UserPoolClient
+    HttpEndpoint:
+      Value: { "Fn::Join" :["", ["https://", { Ref: ApiGatewayRestApi }, ".execute-api.${self:provider.region}.amazonaws.com/${self:custom.stage}"]]} 
 
   Resources:
     OriginalBucket:
