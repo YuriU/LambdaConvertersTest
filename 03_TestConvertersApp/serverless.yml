@@ -62,6 +62,15 @@ functions:
      - sqs:
          arn: !GetAtt CopyOriginalFileQueue.Arn
 
+  ProcessConversionResult:
+    handler: Pipeline.ProcessResult::Pipeline.ProcessResult.ProcessResultHandler::ProcessResult
+    timeout: 15
+    package:
+      artifact: Pipeline.ProcessResult/bin/Release/netcoreapp3.1/Pipeline.ProcessResult.zip
+    events:
+     - sqs:
+         arn: !GetAtt ResultNotificationQueue.Arn
+
   #DummyConvert:
   #  image: <image>
   #  events:

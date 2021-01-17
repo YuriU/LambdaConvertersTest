@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using Amazon.Lambda.Core;
@@ -9,7 +8,6 @@ using Amazon.Lambda.SQSEvents;
 using Amazon.S3;
 using Amazon.S3.Model;
 using Amazon.SQS;
-using Amazon.SQS.Model;
 using Pipeline.Contracts;
 using Pipeline.Contracts.Exceptions;
 
