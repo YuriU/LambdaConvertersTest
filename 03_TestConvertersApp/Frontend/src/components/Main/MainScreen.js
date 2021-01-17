@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { Auth } from 'aws-amplify';
 import Login from './Login';
 import '../../styles/Main.css'
-import FilesList from './FilesList'
+import JobsList from './JobsList'
 
 import {
   Router as Router,
@@ -25,6 +25,7 @@ class MainScreen extends Component {
       };
 
       this.updateLoginState = this.updateLoginState.bind(this);
+      this.renderContent = this.renderContent.bind(this);
     }
 
     async componentDidMount() {
@@ -39,6 +40,7 @@ class MainScreen extends Component {
     async updateLoginState() {
       try {
         const currentSession = await Auth.currentSession();
+        console.log('CURRENT SESSION >>> ' + JSON.stringify(currentSession));
         if(currentSession) {
           this.setState({
             authenticated: true
@@ -57,14 +59,14 @@ class MainScreen extends Component {
       }
     }
 
-    renderContent() {
+    renderContent(authenticated) {
         return (<Router history={this.props.history}>
           <Switch>
             <Route path="/login">
               <Login updateLoginState={this.updateLoginState} history={this.props.history} />
             </Route>
             <Route path="/">
-              { this.state.authenticated ? <FilesList httpClient={this.props.httpClient}/> : <Redirect to="/login" /> }
+              { authenticated ? <JobsList httpClient={this.props.httpClient}/> : <Redirect to="/login" /> }
             </Route>
           </Switch>
         </Router>)
@@ -90,7 +92,7 @@ class MainScreen extends Component {
             </ul>
           </nav>
           {
-            this.renderContent()
+            this.renderContent(true)
           }
           <footer className="footer">
               <span className="text-muted">Yurii Ulianets 2020. Powered by <a href="https://aws.amazon.com/">AWS</a>,<a href="https://serverless.com/">Serverless</a>,<a href="https://reactjs.org/">React</a> and <a href="https://aws-amplify.github.io/docs/js/authentication">AmplifyJS</a></span>

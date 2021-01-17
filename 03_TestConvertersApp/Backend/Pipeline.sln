@@ -11,7 +11,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pipeline.CopyOriginalFile",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pipeline.ProcessResult", "Pipeline.ProcessResult\Pipeline.ProcessResult.csproj", "{25223F6B-CAC8-4DDC-B97E-755D44C91DF7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pipeline.GetFilesList", "Pipeline.GetFilesList\Pipeline.GetFilesList.csproj", "{ADF1CA07-2032-443D-A76B-0ED493A707C6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pipeline.GetJobsList", "Pipeline.GetJobsList\Pipeline.GetJobsList.csproj", "{ADF1CA07-2032-443D-A76B-0ED493A707C6}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pipeline.GetUploadUrl", "Pipeline.GetUploadUrl\Pipeline.GetUploadUrl.csproj", "{D675F9BE-A9AB-4265-9EE7-EB2112D95EDF}"
 EndProject

@@ -8,9 +8,9 @@ class HttpClient {
         this.endpoint = Config.BackendHttpEndpoint;
     }
 
-    async getFilesList() {
+    async getJobsList() {
         let accessToken = await (await Auth.currentSession()).getIdToken().getJwtToken();
-        return await this.get('/getFilesList', accessToken)
+        return await this.get('/getJobsList', accessToken)
     }
 
     async post(method, data, accessToken) {

@@ -3,8 +3,8 @@
     <PropertyGroup>
         <TargetFramework>netcoreapp3.1</TargetFramework>
         <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
-        <AssemblyName>Pipeline.GetFilesList</AssemblyName>
         <PackageId>aws-csharp</PackageId>
+        <RootNamespace>Pipeline.GetJobsList</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>

@@ -93,17 +93,17 @@ functions:
      - sqs:
          arn: !GetAtt ResultNotificationQueue.Arn
 
-  GetFilesList:
-    handler: Pipeline.GetFilesList::Pipeline.GetFilesList.GetFileListHandler::GetFilesList
+  GetJobsList:
+    handler: Pipeline.GetJobsList::Pipeline.GetJobsList.GetJobsListHandler::GetJobsList
     timeout: 15
     package:
-      artifact: Backend/Pipeline.GetFilesList/bin/Release/netcoreapp3.1/Pipeline.GetFilesList.zip
+      artifact: Backend/Pipeline.GetJobsList/bin/Release/netcoreapp3.1/Pipeline.GetJobsList.zip
     environment:
-      FILES_TABLE_NAME: { Ref: FilesTable }
+      CONVERSION_JOBS_TABLE_NAME: { Ref: ConversionJobsTable }
     events:
       - http:
           cors: true
-          path: /getFilesList
+          path: /getJobsList
           method: get
           authorizer:
             name: authorizer
