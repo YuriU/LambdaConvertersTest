@@ -25,7 +25,6 @@ class MainScreen extends Component {
       };
 
       this.updateLoginState = this.updateLoginState.bind(this);
-      this.onCreateSession = this.onCreateSession.bind(this);
     }
 
     async componentDidMount() {
@@ -65,16 +64,11 @@ class MainScreen extends Component {
               <Login updateLoginState={this.updateLoginState} history={this.props.history} />
             </Route>
             <Route path="/">
-              { this.state.authenticated ? <FilesList/> : <Redirect to="/login" /> }
+              { this.state.authenticated ? <FilesList httpClient={this.props.httpClient}/> : <Redirect to="/login" /> }
             </Route>
           </Switch>
         </Router>)
     }
-
-    async onCreateSession(items) {
-      const result = await this.props.httpClient.startSession(items);
-      this.props.history.push('/session/' + result.SessionId)        
-  }
 
     render() {
         return (<div className="mainscreen">
