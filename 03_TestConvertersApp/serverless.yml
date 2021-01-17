@@ -2,10 +2,6 @@ service: testconvertersapp
 
 frameworkVersion: '2'
 
-# npm install serverless-s3-remover
-plugins:
-  - serverless-s3-remover
-
 provider:
   name: aws
   region: eu-central-1
@@ -32,11 +28,6 @@ provider:
   
 package:
   individually: true
-
-custom:
-  remover:
-     buckets:
-        - { Ref: OriginalBucket }
 
 functions:
   FileUploaded:
@@ -69,6 +60,12 @@ functions:
   #       arn: !GetAtt DummyConverterQueue.Arn
 
 resources:
+  Outputs:
+    OriginalBucket:
+      Value: { Ref: OriginalBucket }
+    ResultBucket:
+      Value: { Ref: ResultBucket }
+
   Resources:
     OriginalBucket:
       Type: "AWS::S3::Bucket"
