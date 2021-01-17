@@ -2,6 +2,13 @@
 {
     public class FileUploadedEvent
     {
+        public string OriginalBucketName { get; set; }
+        
+        public string Key { get; set; }
+        
+        public string ResultBucketName { get; set; }
+        
+        // For deserialization. System.Text.JsonJsonSerializer WTF ?
         public FileUploadedEvent()
         {
         }
@@ -12,11 +19,5 @@
             Key = key;
             ResultBucketName = resultBucketName;
         }
-        
-        public string OriginalBucketName { get; set; }
-        
-        public string Key { get; set; }
-        
-        public string ResultBucketName { get; set; }
     }
 }

@@ -8,37 +8,53 @@ using Amazon.Lambda.Core;
 using Amazon.Lambda.SQSEvents;
 using Amazon.S3;
 using Amazon.S3.Model;
+using Amazon.SQS;
+using Amazon.SQS.Model;
 using Pipeline.Contracts;
+using Pipeline.Contracts.Exceptions;
 
 [assembly:LambdaSerializer(typeof(Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer))]
 namespace Pipeline.CopyOriginalFile
 {
-    public class FileUploadedHandler
+    public class ConvertFileHandler
     {
         private static AmazonS3Client S3Client = new AmazonS3Client();
-        public async Task OriginalFileUploaded(SQSEvent @event, ILambdaContext context)
+        
+        private static AmazonSQSClient SqsClient = new AmazonSQSClient(); 
+        
+        private readonly string _resultNotificationQueue = Environment.GetEnvironmentVariable("RESULT_NOTIFICATION_QUEUE");
+        
+        private readonly string _conversionName = Environment.GetEnvironmentVariable("CONVERSION_NAME");
+        public async Task Convert(SQSEvent @event, ILambdaContext context)
         {
-            if (@event.Records != null)
+            foreach (var record in @event.Records)
             {
-                foreach (var record in @event.Records)
-                {
-                    var file = JsonSerializer.Deserialize<FileUploadedEvent>(record.Body);
-                    await ProcessEvent(file);
-                }
+                var file = JsonSerializer.Deserialize<FileUploadedEvent>(record.Body);
+                await ProcessEvent(file, context);
             }
         }
 
-        public async Task ProcessOriginalFileUploaded(FileUploadedEvent @event, ILambdaContext context)
+        public async Task ProcessEvent(FileUploadedEvent file, ILambdaContext context)
         {
-            context.Logger.Log($"Processing event {JsonSerializer.Serialize(@event)}");
-            await ProcessEvent(@event);
-        }
+            FileProcessedEvent result = null;
+            try
+            {
+                var tempFilePath = GetTempFilePath(file.Key);
+                await DownloadFile(file.OriginalBucketName, file.Key, tempFilePath);
+                var resultFileKey = $"{_conversionName}/{file.Key}";
+                await UploadFile(tempFilePath, file.ResultBucketName, resultFileKey);
 
-        private async Task ProcessEvent(FileUploadedEvent file)
-        {
-            var tempFilePath = GetTempFilePath(file.Key);
-            await DownloadFile(file.OriginalBucketName, file.Key, tempFilePath);
-            await UploadFile(tempFilePath, file.ResultBucketName, file.Key);
+                result = new FileProcessedEvent(file.Key, resultFileKey, 0l);
+            }
+            catch (Exception e)
+            {
+                result = new FileProcessedEvent(file.Key, 0, new ExceptionInfo(e));
+            }
+            finally
+            {
+                await SqsClient.SendMessageAsync(_resultNotificationQueue, JsonSerializer.Serialize(result),
+                    CancellationToken.None);
+            }
         }
 
         private static async Task DownloadFile(string srcBucket, string srcKey, string destFileName)

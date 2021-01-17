@@ -25,6 +25,12 @@ provider:
         - s3:PutObject
       Resource:
         - { "Fn::Join" : [ "", [{ "Fn::GetAtt" : [ResultBucket, Arn] }, "/*"] ]}
+    - Effect: Allow
+      Action:
+        - sqs:SendMessage
+      Resource:
+         !GetAtt ResultNotificationQueue.Arn
+
   
 package:
   individually: true
@@ -45,8 +51,11 @@ functions:
           existing: true
 
   CopyOriginalFile:
-    handler: Pipeline.CopyOriginalFile::Pipeline.CopyOriginalFile.FileUploadedHandler::OriginalFileUploaded
-    timeout: 10
+    handler: Pipeline.CopyOriginalFile::Pipeline.CopyOriginalFile.ConvertFileHandler::Convert
+    timeout: 15
+    environment:
+      RESULT_NOTIFICATION_QUEUE: { Ref: ResultNotificationQueue }
+      CONVERSION_NAME: "Original"
     package:
       artifact: Pipeline.CopyOriginalFile/bin/Release/netcoreapp3.1/Pipeline.CopyOriginalFile.zip
     events:
@@ -77,6 +86,9 @@ resources:
       Type: "AWS::SNS::Topic"
       Properties:
         TopicName: "testconvertersapp-FileUploaded"
+
+    ResultNotificationQueue:
+      Type: "AWS::SQS::Queue"
 
     # Copy original file queue
     CopyOriginalFileQueue:
