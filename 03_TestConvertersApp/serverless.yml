@@ -87,6 +87,8 @@ functions:
   ProcessConversionResult:
     handler: Pipeline.ProcessResult::Pipeline.ProcessResult.ProcessResultHandler::ProcessResult
     timeout: 15
+    environment:
+      CONVERSION_JOBS_TABLE_NAME: { Ref: ConversionJobsTable }
     package:
       artifact: Backend/Pipeline.ProcessResult/bin/Release/netcoreapp3.1/Pipeline.ProcessResult.zip
     events:

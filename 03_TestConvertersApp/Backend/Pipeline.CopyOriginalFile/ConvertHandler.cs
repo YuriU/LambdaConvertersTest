@@ -49,11 +49,11 @@ namespace Pipeline.CopyOriginalFile
 
                 await UploadFile(tempFilePath, file.ResultBucketName, resultFileKey);
 
-                result = new FileProcessedEvent(file.Key, resultFileKey, 0l);
+                result = new FileProcessedEvent(file.JobId, _conversionName, file.Key, resultFileKey, 0l);
             }
             catch (Exception e)
             {
-                result = new FileProcessedEvent(file.Key, 0, new ExceptionInfo(e));
+                result = new FileProcessedEvent(file.JobId, _conversionName, file.Key, 0, new ExceptionInfo(e));
             }
             finally
             {

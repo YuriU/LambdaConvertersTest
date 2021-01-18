@@ -4,6 +4,8 @@ namespace Pipeline.Contracts
 {
     public class FileProcessedEvent
     {
+        public string JobId { get; set; }
+        public string Converter { get; set; }
         public string OriginalKey { get; set; }
         
         public string ResultKey { get; set; }
@@ -19,16 +21,20 @@ namespace Pipeline.Contracts
         {
         }
         
-        public FileProcessedEvent(string originalKey, string resultKey, long ellapsedMiliseconds)
+        public FileProcessedEvent(string jobId, string converter, string originalKey, string resultKey, long ellapsedMiliseconds)
         {
+            JobId = jobId;
+            Converter = converter;
             OriginalKey = originalKey;
             ResultKey = resultKey;
             EllapsedMiliseconds = ellapsedMiliseconds;
             Sucessful = true;
         }
         
-        public FileProcessedEvent(string originalKey, long ellapsedMiliseconds, ExceptionInfo exceptionInfo)
+        public FileProcessedEvent(string jobId, string converter, string originalKey, long ellapsedMiliseconds, ExceptionInfo exceptionInfo)
         {
+            JobId = jobId;
+            Converter = converter;
             OriginalKey = originalKey;
             EllapsedMiliseconds = ellapsedMiliseconds;
             ExceptionInfo = exceptionInfo;

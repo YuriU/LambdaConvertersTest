@@ -8,6 +8,7 @@ using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.Model;
 using Amazon.Lambda.Core;
 using Amazon.Lambda.S3Events;
+using Amazon.Runtime.Internal;
 using Amazon.S3;
 using Amazon.SimpleNotificationService;
 using Amazon.SimpleNotificationService.Model;
@@ -18,13 +19,13 @@ namespace Pipeline.FileUploaded
 {
     public class FileUploadedHandler
     {
-        private readonly IAmazonDynamoDB _dynamoDbClient = new AmazonDynamoDBClient();
-        
         private readonly string _notifyTopicArn = Environment.GetEnvironmentVariable("FILE_UPLOADED_TOPIC_ARN");
         
         private readonly string _resultBucketName = Environment.GetEnvironmentVariable("RESULT_BUCKET_NAME");
 
         private readonly string _conversionJobsTable = Environment.GetEnvironmentVariable("CONVERSION_JOBS_TABLE_NAME");
+        
+        private readonly IAmazonDynamoDB _dynamoDbClient = new AmazonDynamoDBClient();
         
         private static AmazonS3Client S3Client = new AmazonS3Client();
         
@@ -41,11 +42,13 @@ namespace Pipeline.FileUploaded
                         var jobId = Guid.NewGuid().ToString();
                         var originalFileName = record.S3.Object.Key;
                         var srcFilePath = await MoveToDestinationBucket(jobId, record.S3.Bucket.Name, originalFileName);
+                        
                         await _dynamoDbClient.PutItemAsync(_conversionJobsTable, new Dictionary<string, AttributeValue>()
                         {
                             { "id" , new AttributeValue  { S = jobId } },
                             { "fileName" , new AttributeValue { S = record.S3.Object.Key} },
-                            { "started" , new AttributeValue { N = DateTime.UtcNow.Ticks.ToString() } },
+                            { "started" , new AttributeValue { N = DateTime.UtcNow.Ticks.ToString() }}, 
+                            { "conversionResults", new AttributeValue() { M = new AutoConstructedDictionary<string, AttributeValue> { }, IsMSet = true }}
                         });
                         
                         LambdaLogger.Log($"Publishing to {_notifyTopicArn}");
