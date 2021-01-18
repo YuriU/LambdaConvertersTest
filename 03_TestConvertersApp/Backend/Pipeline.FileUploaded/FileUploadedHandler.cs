@@ -13,6 +13,7 @@ using Amazon.S3;
 using Amazon.SimpleNotificationService;
 using Amazon.SimpleNotificationService.Model;
 using Pipeline.Contracts;
+using Pipeline.Data;
 
 [assembly:LambdaSerializer(typeof(Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer))]
 namespace Pipeline.FileUploaded
@@ -23,7 +24,7 @@ namespace Pipeline.FileUploaded
         
         private readonly string _resultBucketName = Environment.GetEnvironmentVariable("RESULT_BUCKET_NAME");
 
-        private readonly string _conversionJobsTable = Environment.GetEnvironmentVariable("CONVERSION_JOBS_TABLE_NAME");
+        private readonly JobsTable _jobsTable = new JobsTable(Environment.GetEnvironmentVariable("CONVERSION_JOBS_TABLE_NAME"));
         
         private readonly IAmazonDynamoDB _dynamoDbClient = new AmazonDynamoDBClient();
         
@@ -39,18 +40,16 @@ namespace Pipeline.FileUploaded
                 {
                     try
                     {
-                        var jobId = Guid.NewGuid().ToString();
                         var originalFileName = record.S3.Object.Key;
+                        var jobId = Guid.NewGuid().ToString();
+                        
+                        // Creating job in DB
+                        await _jobsTable.AddJob(jobId, originalFileName, DateTime.UtcNow);
+                        
+                        // Move file to dedicated job table
                         var srcFilePath = await MoveToDestinationBucket(jobId, record.S3.Bucket.Name, originalFileName);
                         
-                        await _dynamoDbClient.PutItemAsync(_conversionJobsTable, new Dictionary<string, AttributeValue>()
-                        {
-                            { "id" , new AttributeValue  { S = jobId } },
-                            { "fileName" , new AttributeValue { S = record.S3.Object.Key} },
-                            { "started" , new AttributeValue { N = DateTime.UtcNow.Ticks.ToString() }}, 
-                            { "conversionResults", new AttributeValue() { M = new AutoConstructedDictionary<string, AttributeValue> { }, IsMSet = true }}
-                        });
-                        
+                        // Publish job started
                         LambdaLogger.Log($"Publishing to {_notifyTopicArn}");
                         await PublishFileUploaded(_notifyTopicArn, jobId, srcFilePath, MakeJobFolderPath(jobId, originalFileName));
                     }

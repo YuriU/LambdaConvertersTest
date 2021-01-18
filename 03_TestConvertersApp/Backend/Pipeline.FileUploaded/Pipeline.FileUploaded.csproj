@@ -19,6 +19,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Pipeline.Contracts\Pipeline.Contracts.csproj" />
+    <ProjectReference Include="..\Pipeline.Data\Pipeline.Data.csproj" />
   </ItemGroup>
 
 </Project>
