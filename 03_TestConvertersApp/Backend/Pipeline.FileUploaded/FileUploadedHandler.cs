@@ -48,6 +48,9 @@ namespace Pipeline.FileUploaded
                         
                         // Move file to dedicated job table
                         var srcFilePath = await MoveToDestinationBucket(jobId, record.S3.Bucket.Name, originalFileName);
+
+                        // Set original file path
+                        await _jobsTable.SetOriginalFile(jobId, srcFilePath);
                         
                         // Publish job started
                         LambdaLogger.Log($"Publishing to {_notifyTopicArn}");
