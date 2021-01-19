@@ -11,6 +11,7 @@ using Amazon.SimpleNotificationService;
 using Amazon.SimpleNotificationService.Model;
 using Pipeline.Contracts;
 using Pipeline.Data;
+using Pipeline.Storage.Utils;
 
 [assembly:LambdaSerializer(typeof(Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer))]
 namespace Pipeline.FileUploaded
@@ -64,13 +65,10 @@ namespace Pipeline.FileUploaded
                 }
             }
         }
-        private static string MakeOriginalFileName(string jobId, string key)
-        {
-            return $"{jobId}/{key}/Original{Path.GetExtension(key)}";
-        }
+    
         private async Task<string> MoveToDestinationBucket(string jobId, string originalBucket, string originalFileName)
         {
-            var originalFileKey = MakeOriginalFileName(jobId, originalFileName);
+            var originalFileKey = StorageUtils.MakeOriginalFilePath(jobId, originalFileName);
             await S3Client.CopyObjectAsync(
                 originalBucket,
                 originalFileName,

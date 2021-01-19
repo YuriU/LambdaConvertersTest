@@ -84,5 +84,14 @@ namespace Pipeline.Data
                 }
             });
         }
+
+        public async Task<string> GetFileName(string jobId)
+        {
+            var item = await _dynamoDbClient.GetItemAsync(_tableName,
+                new Dictionary<string, AttributeValue>() {{"id", new AttributeValue() {S = jobId}}});
+
+
+            return item.Item["fileName"].S;
+        }
     }
 }

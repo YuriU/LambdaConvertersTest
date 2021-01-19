@@ -84,7 +84,7 @@ functions:
     timeout: 15
     environment:
       RESULT_NOTIFICATION_QUEUE: { Ref: ResultNotificationQueue }
-      CONVERSION_NAME: "Original"
+      CONVERSION_NAME: "Copy"
     package:
       artifact: Backend/Pipeline.CopyOriginalFile/bin/Release/netcoreapp3.1/Pipeline.CopyOriginalFile.zip
     events:
@@ -96,6 +96,8 @@ functions:
     timeout: 15
     environment:
       CONVERSION_JOBS_TABLE_NAME: { Ref: ConversionJobsTable }
+      RESULT_BUCKET_NAME: { Ref: ResultBucket }
+      UPLOAD_RESULT_BUCKET_NAME: { Ref: UploadResultBucket }
     package:
       artifact: Backend/Pipeline.ProcessResult/bin/Release/netcoreapp3.1/Pipeline.ProcessResult.zip
     events:
