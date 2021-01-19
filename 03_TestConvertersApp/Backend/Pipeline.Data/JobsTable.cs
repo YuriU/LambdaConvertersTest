@@ -68,7 +68,7 @@ namespace Pipeline.Data
                 TableName = _tableName,
                 Key = new Dictionary<string, AttributeValue>() { { "id", new AttributeValue() { S = jobId }}},
                 UpdateExpression = "SET #converters.#converter = :result",
-                ConditionExpression = "if_not_exists(#converters, #converter)",
+                ConditionExpression = "attribute_not_exists(#converters.#converter)",
                 ExpressionAttributeNames =
                 {
                     { "#converters", "conversionResults" },
