@@ -45,8 +45,6 @@ provider:
       - dynamodb:BatchWriteItem
       - dynamodb:UpdateItem
       Resource:
-        - !GetAtt FilesTable.Arn
-        - { "Fn::Join" : [ "/", [{ "Fn::GetAtt" : [FilesTable, Arn] }, "index/*"] ]}
         - !GetAtt ConversionJobsTable.Arn
         - { "Fn::Join" : [ "/", [{ "Fn::GetAtt" : [ConversionJobsTable, Arn] }, "index/*"] ]}
 
@@ -147,19 +145,6 @@ resources:
 
     ResultNotificationQueue:
       Type: "AWS::SQS::Queue"
-
-    FilesTable:
-      Type: "AWS::DynamoDB::Table"
-      Properties:
-        AttributeDefinitions:
-          - AttributeName: fileName
-            AttributeType: S
-        KeySchema:
-          - AttributeName: fileName
-            KeyType: HASH
-        ProvisionedThroughput:
-          ReadCapacityUnits: 1
-          WriteCapacityUnits: 1
 
     ConversionJobsTable:
       Type: "AWS::DynamoDB::Table"
