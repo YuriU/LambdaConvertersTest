@@ -18,9 +18,17 @@ provider:
     - Effect: Allow
       Action:
         - s3:DeleteObject
+        - s3:PutObject
         - s3:GetObject
       Resource:
-        - { "Fn::Join" : [ "", [{ "Fn::GetAtt" : [OriginalBucket, Arn] }, "/*"] ]}
+        - { "Fn::Join" : [ "", [{ "Fn::GetAtt" : [UploadOriginalBucket, Arn] }, "/*"] ]}
+    - Effect: Allow
+      Action:
+        - s3:DeleteObject
+        - s3:PutObject
+        - s3:GetObject
+      Resource:
+        - { "Fn::Join" : [ "", [{ "Fn::GetAtt" : [UploadResultBucket, Arn] }, "/*"] ]}
     - Effect: Allow
       Action:
         - s3:GetObject
@@ -61,12 +69,13 @@ functions:
     environment:
       FILE_UPLOADED_TOPIC_ARN: { Ref: FileUploadedTopic }
       RESULT_BUCKET_NAME: { Ref: ResultBucket }
+      UPLOAD_RESULT_BUCKET_NAME: { Ref: UploadResultBucket }
       CONVERSION_JOBS_TABLE_NAME: { Ref: ConversionJobsTable }
     package:
       artifact: Backend/Pipeline.FileUploaded/bin/Release/netcoreapp3.1/Pipeline.FileUploaded.zip
     events:
       - s3:
-          bucket:  { Ref: OriginalBucket }
+          bucket:  { Ref: UploadOriginalBucket }
           event: s3:ObjectCreated:*
           existing: true
 
@@ -120,8 +129,8 @@ resources:
   Outputs:
     Region:
       Value: "${self:provider.region}"
-    OriginalBucket:
-      Value: { Ref: OriginalBucket }
+    UploadOriginalBucket:
+      Value: { Ref: UploadOriginalBucket }
     ResultBucket:
       Value: { Ref: ResultBucket }
     UserPoolId:
@@ -132,7 +141,10 @@ resources:
       Value: { "Fn::Join" :["", ["https://", { Ref: ApiGatewayRestApi }, ".execute-api.${self:provider.region}.amazonaws.com/${self:custom.stage}"]]} 
 
   Resources:
-    OriginalBucket:
+    UploadOriginalBucket:
+      Type: "AWS::S3::Bucket"
+
+    UploadResultBucket:
       Type: "AWS::S3::Bucket"
 
     ResultBucket:

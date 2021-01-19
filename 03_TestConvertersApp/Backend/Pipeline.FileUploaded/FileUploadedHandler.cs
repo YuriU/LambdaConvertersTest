@@ -1,14 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Amazon.DynamoDBv2;
-using Amazon.DynamoDBv2.Model;
 using Amazon.Lambda.Core;
 using Amazon.Lambda.S3Events;
-using Amazon.Runtime.Internal;
 using Amazon.S3;
 using Amazon.SimpleNotificationService;
 using Amazon.SimpleNotificationService.Model;
@@ -23,6 +20,8 @@ namespace Pipeline.FileUploaded
         private readonly string _notifyTopicArn = Environment.GetEnvironmentVariable("FILE_UPLOADED_TOPIC_ARN");
         
         private readonly string _resultBucketName = Environment.GetEnvironmentVariable("RESULT_BUCKET_NAME");
+        
+        private readonly string _uploadResultBucketName = Environment.GetEnvironmentVariable("UPLOAD_RESULT_BUCKET_NAME");
 
         private readonly JobsTable _jobsTable = new JobsTable(Environment.GetEnvironmentVariable("CONVERSION_JOBS_TABLE_NAME"));
         
@@ -54,7 +53,7 @@ namespace Pipeline.FileUploaded
                         
                         // Publish job started
                         LambdaLogger.Log($"Publishing to {_notifyTopicArn}");
-                        await PublishFileUploaded(_notifyTopicArn, jobId, srcFilePath, MakeJobFolderPath(jobId, originalFileName));
+                        await PublishFileUploaded(_notifyTopicArn, jobId, srcFilePath);
                     }
                     catch (Exception e)
                     {
@@ -69,12 +68,6 @@ namespace Pipeline.FileUploaded
         {
             return $"{jobId}/{key}/Original{Path.GetExtension(key)}";
         }
-        
-        private static string MakeJobFolderPath(string jobId, string key)
-        {
-            return $"{jobId}/{key}";
-        }
-        
         private async Task<string> MoveToDestinationBucket(string jobId, string originalBucket, string originalFileName)
         {
             var originalFileKey = MakeOriginalFileName(jobId, originalFileName);
@@ -88,9 +81,9 @@ namespace Pipeline.FileUploaded
             await S3Client.DeleteObjectAsync(originalBucket, originalFileName);
             return originalFileKey;
         }
-        private async Task PublishFileUploaded(string topic, string jobId, string key, string uploadPath)
+        private async Task PublishFileUploaded(string topic, string jobId, string key)
         {
-            var fileUploadedEvent = new FileUploadedEvent(jobId, _resultBucketName, key, _resultBucketName, uploadPath);
+            var fileUploadedEvent = new FileUploadedEvent(jobId, _resultBucketName, key, _uploadResultBucketName);
 
             var publishRequest = new PublishRequest
             {

@@ -40,13 +40,11 @@ namespace Pipeline.CopyOriginalFile
             try
             {
                 var tempFilePath = GetTempFilePath(file.Key);
+
+                var resultFileKey = Path.GetFileName(tempFilePath);
                 
                 await DownloadFile(file.OriginalBucketName, file.Key, tempFilePath);
                 
-                var resultFileKey = MakeResultFileName(file.ResultBucketUploadFolder, _conversionName, file.Key);
-                
-                context.Logger.Log(resultFileKey);
-
                 await UploadFile(tempFilePath, file.ResultBucketName, resultFileKey);
 
                 result = new FileProcessedEvent(file.JobId, _conversionName, file.Key, resultFileKey, 0l);
@@ -60,10 +58,6 @@ namespace Pipeline.CopyOriginalFile
                 await SqsClient.SendMessageAsync(_resultNotificationQueue, JsonSerializer.Serialize(result),
                     CancellationToken.None);
             }
-        }
-        private static string MakeResultFileName(string uploadResultPath, string conversion, string fileKey)
-        {
-            return $"{uploadResultPath}/{conversion}/Converted{Path.GetExtension(fileKey)}";
         }
 
         private static async Task DownloadFile(string srcBucket, string srcKey, string destFileName)

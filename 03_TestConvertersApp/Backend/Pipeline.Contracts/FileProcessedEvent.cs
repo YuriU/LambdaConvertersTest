@@ -7,7 +7,6 @@ namespace Pipeline.Contracts
         public string JobId { get; set; }
         public string Converter { get; set; }
         public string OriginalKey { get; set; }
-        
         public string ResultKey { get; set; }
         
         public bool Sucessful { get; set; }

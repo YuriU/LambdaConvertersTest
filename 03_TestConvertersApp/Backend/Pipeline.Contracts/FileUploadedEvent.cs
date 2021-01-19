@@ -22,23 +22,17 @@
         /// </summary>
         public string ResultBucketName { get; set; }
         
-        /// <summary>
-        /// Folder to upload result
-        /// </summary>
-        public string ResultBucketUploadFolder { get; set; }
-        
         // For deserialization. System.Text.JsonJsonSerializer WTF ?
         public FileUploadedEvent()
         {
         }
         
-        public FileUploadedEvent(string jobId, string originalBucketName, string fileKey, string resultBucketName, string resultBucketUploadFolder)
+        public FileUploadedEvent(string jobId, string originalBucketName, string fileKey, string resultBucketName)
         {
             JobId = jobId;
             OriginalBucketName = originalBucketName;
             Key = fileKey;
             ResultBucketName = resultBucketName;
-            ResultBucketUploadFolder = resultBucketUploadFolder;
         }
     }
 }

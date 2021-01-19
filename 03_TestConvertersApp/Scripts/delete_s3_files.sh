@@ -9,26 +9,37 @@ echo "Or press enter to continue"
 
 read
 
-echo "Deleting original files from ${STAGE}..."
+echo "Deleting original upload files from ${STAGE}..."
 mkdir /tmp/empty
 
 BUCKET_NAME=$(aws \
     cloudformation describe-stacks \
     --stack-name "testconvertersapp-${STAGE}" \
-    --query "Stacks[0].Outputs[?OutputKey=='OriginalBucket'] | [0].OutputValue" \
+    --query "Stacks[0].Outputs[?OutputKey=='UploadOriginalBucket'] | [0].OutputValue" \
     --output text)
 
 
 aws s3 sync --delete /tmp/empty/ "s3://${BUCKET_NAME}/"
 
-echo "Deleting original files from ${STAGE}..."
+echo "Deleting result upload files from ${STAGE}..."
 
 BUCKET_NAME=$(aws \
     cloudformation describe-stacks \
     --stack-name "testconvertersapp-${STAGE}" \
-    --query "Stacks[0].Outputs[?OutputKey=='ResultBucket'] | [0].OutputValue" \
+    --query "Stacks[0].Outputs[?OutputKey=='UploadResultBucket'] | [0].OutputValue" \
     --output text)
 
 aws s3 sync --delete /tmp/empty/ "s3://${BUCKET_NAME}/"
+
+echo "Deleting result files from ${STAGE}..."
+
+BUCKET_NAME=$(aws \
+    cloudformation describe-stacks \
+    --stack-name "testconvertersapp-${STAGE}" \
+    --query "Stacks[0].Outputs[?OutputKey=='UploadResultBucket'] | [0].OutputValue" \
+    --output text)
+
+aws s3 sync --delete /tmp/empty/ "s3://${BUCKET_NAME}/"
+
 rmdir /tmp/empty
 echo "Bucket ${BUCKET_NAME} has been emptied"
