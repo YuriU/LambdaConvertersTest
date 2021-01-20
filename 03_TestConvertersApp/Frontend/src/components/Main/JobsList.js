@@ -19,11 +19,11 @@ class JobsList extends Component {
     }
 
     render() {
-        return(<ul>
+        return(<div>
             {this.state.jobs.map((item, index) => {
-                return (<li><JobItem job={item} id={item.id} /></li>)
+                return (<JobItem job={item} id={item.id} />)
             })}
-        </ul>);
+        </div>);
     }
 }
 

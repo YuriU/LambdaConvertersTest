@@ -40,7 +40,6 @@ class MainScreen extends Component {
     async updateLoginState() {
       try {
         const currentSession = await Auth.currentSession();
-        console.log('CURRENT SESSION >>> ' + JSON.stringify(currentSession));
         if(currentSession) {
           this.setState({
             authenticated: true
@@ -66,7 +65,9 @@ class MainScreen extends Component {
               <Login updateLoginState={this.updateLoginState} history={this.props.history} />
             </Route>
             <Route path="/">
-              { authenticated ? <JobsList httpClient={this.props.httpClient}/> : <Redirect to="/login" /> }
+              { authenticated 
+              ? <div className="container"><JobsList httpClient={this.props.httpClient}/></div>
+              : <Redirect to="/login" /> }
             </Route>
           </Switch>
         </Router>)
