@@ -22,6 +22,12 @@ class Login extends Component {
     }
 
     async login() {
+
+      if(this.state.userName === ""){
+        this.setState({
+          message: 'Please enter user name',
+        })
+      }
       try 
       {
         const user = await Auth.signIn(this.state.userName, this.state.password);

@@ -21,7 +21,7 @@ class JobsList extends Component {
     render() {
         return(<div>
             {this.state.jobs.map((item, index) => {
-                return (<JobItem job={item} id={item.id} />)
+                return (<JobItem job={item} key={item.id} />)
             })}
         </div>);
     }

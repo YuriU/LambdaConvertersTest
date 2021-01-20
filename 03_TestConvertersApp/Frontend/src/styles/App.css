@@ -57,6 +57,28 @@ html, body {
     height: 100%;
 }
 
+.btn-download {
+    padding: 0px 20px;
+    border-style: none;
+    border-radius: 5px
+}
+
+.success {
+    background-color: rgb(187, 230, 187);
+}
+
+.failed {
+    background-color: rgb(216, 143, 149);
+}
+
+.unknown {
+    background-color: lightgrey;
+}
+
+.btn-download:focus {
+    outline: none;
+}
+
 .flexBox .row {
     /*border: 1px dotted grey;*/
 }
