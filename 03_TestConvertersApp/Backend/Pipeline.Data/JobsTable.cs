@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.Model;
 using Amazon.Runtime.Internal;
+using Pipeline.Contracts;
 
 namespace Pipeline.Data
 {
@@ -89,9 +91,27 @@ namespace Pipeline.Data
         {
             var item = await _dynamoDbClient.GetItemAsync(_tableName,
                 new Dictionary<string, AttributeValue>() {{"id", new AttributeValue() {S = jobId}}});
-
-
+            
             return item.Item["fileName"].S;
+        }
+
+        public async Task<List<ConversionJobDto>> GetJobDtos()
+        {
+            var fileNames = await _dynamoDbClient.ScanAsync(_tableName, 
+                new List<string>() { "id", "fileName", "started", "conversionResults" });
+            var result = fileNames.Items.Select(i => new ConversionJobDto
+            {
+                JobId = i["id"].S,
+                FileName = i["fileName"].S,
+                Started = long.Parse(i["started"].N),
+                ConversionStatuses = i["conversionResults"].M.ToDictionary(
+                    p => p.Key, 
+                    p => new ConversionStatus
+                    {
+                        Successful = p.Value.M["sucessful"].BOOL
+                    })
+            }).ToList();
+            return result;
         }
     }
 }

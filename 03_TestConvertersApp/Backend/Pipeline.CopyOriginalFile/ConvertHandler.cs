@@ -17,13 +17,13 @@ namespace Pipeline.CopyOriginalFile
     public class ConvertFileHandler
     {
         private static AmazonS3Client S3Client = new AmazonS3Client();
-        
+
         private static AmazonSQSClient SqsClient = new AmazonSQSClient(); 
-        
+
         private readonly string _resultNotificationQueue = Environment.GetEnvironmentVariable("RESULT_NOTIFICATION_QUEUE");
-        
+
         private readonly string _conversionName = Environment.GetEnvironmentVariable("CONVERSION_NAME");
-        
+
         public async Task Convert(SQSEvent @event, ILambdaContext context)
         {
             context.Logger.Log(JsonSerializer.Serialize(@event));
@@ -47,11 +47,11 @@ namespace Pipeline.CopyOriginalFile
                 
                 await UploadFile(tempFilePath, file.ResultBucketName, resultFileKey);
 
-                result = new FileProcessedEvent(file.JobId, _conversionName, file.Key, resultFileKey, 0l);
+                result = new FileProcessedEvent(file.JobId, _conversionName, resultFileKey, 0l);
             }
             catch (Exception e)
             {
-                result = new FileProcessedEvent(file.JobId, _conversionName, file.Key, 0, new ExceptionInfo(e));
+                result = new FileProcessedEvent(file.JobId, _conversionName, 0, new ExceptionInfo(e));
             }
             finally
             {

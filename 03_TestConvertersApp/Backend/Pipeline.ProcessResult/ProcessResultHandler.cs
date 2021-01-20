@@ -6,6 +6,7 @@ using Amazon.DynamoDBv2;
 using Amazon.Lambda.Core;
 using Amazon.Lambda.SQSEvents;
 using Amazon.S3;
+using Amazon.S3.Model;
 using Pipeline.Contracts;
 using Pipeline.Data;
 using Pipeline.Storage.Utils;
@@ -36,13 +37,7 @@ namespace Pipeline.ProcessResult
 
                     var fileName = await _jobsTable.GetFileName(jobId);
                     var convertedKey = StorageUtils.MakeConvertedFilePath(jobId, fileName, result.Converter, Path.GetExtension(result.ResultKey));
-                    
-                    LambdaLogger.Log("convertedKey  " + convertedKey);
-                    LambdaLogger.Log("jobId  " + jobId);
-                    LambdaLogger.Log("fileName  " + fileName);
-                    LambdaLogger.Log("result.Converter  " + result.Converter);
-                    LambdaLogger.Log("Path.GetExtension(result.ResultKey)  " + Path.GetExtension(result.ResultKey));
-                    
+
                     await S3Client.CopyObjectAsync(
                         _uploadResultBucketName,
                         result.ResultKey,
