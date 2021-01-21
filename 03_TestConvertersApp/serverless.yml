@@ -162,6 +162,17 @@ resources:
   Resources:
     UploadOriginalBucket:
       Type: "AWS::S3::Bucket"
+      Properties:
+         CorsConfiguration:
+            CorsRules:
+              -
+                AllowedOrigins: 
+                  - "*"
+                AllowedMethods: 
+                  - PUT
+                AllowedHeaders: 
+                  - "*"
+
 
     UploadResultBucket:
       Type: "AWS::S3::Bucket"
