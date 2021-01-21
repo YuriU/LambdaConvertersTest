@@ -1,9 +1,7 @@
 ﻿using System;
-using System.IO;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using Amazon.DynamoDBv2;
 using Amazon.Lambda.Core;
 using Amazon.Lambda.S3Events;
 using Amazon.S3;
@@ -25,9 +23,7 @@ namespace Pipeline.FileUploaded
         private readonly string _uploadResultBucketName = Environment.GetEnvironmentVariable("UPLOAD_RESULT_BUCKET_NAME");
 
         private readonly JobsTable _jobsTable = new JobsTable(Environment.GetEnvironmentVariable("CONVERSION_JOBS_TABLE_NAME"));
-        
-        private readonly IAmazonDynamoDB _dynamoDbClient = new AmazonDynamoDBClient();
-        
+
         private static AmazonS3Client S3Client = new AmazonS3Client();
         
         private static AmazonSimpleNotificationServiceClient _snsClient = new AmazonSimpleNotificationServiceClient();

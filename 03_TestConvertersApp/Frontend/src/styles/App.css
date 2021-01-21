@@ -64,6 +64,10 @@ html, body {
     border-radius: 5px
 }
 
+.btn-download:focus {
+    outline: none;
+}
+
 .success {
     background-color: rgb(187, 230, 187);
 }
@@ -78,18 +82,26 @@ html, body {
 
 .uploadPanel {
     position: absolute;
+    transform: translate(50%, 0);
+    left: 50%;
     bottom: 60px;
     left: 0;
-    width: 100%;
+    width: 50%;
     background-color: darkgrey;
     margin-top: 20px;
     border-radius: 5px;
     padding: 20px 0px;
 }
 
-.btn-download:focus {
-    outline: none;
+.btn-upload {
+    margin-top: 10px;
+    width: 50%;
+    padding: 10px 20px;
+    border-style: none;
+    border-radius: 5px
 }
+
+
 
 .flexBox .row {
     /*border: 1px dotted grey;*/

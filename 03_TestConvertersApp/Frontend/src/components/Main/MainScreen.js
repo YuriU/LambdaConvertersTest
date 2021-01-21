@@ -69,7 +69,7 @@ class MainScreen extends Component {
               { authenticated 
               ? <div className="container">
                   <JobsList httpClient={this.props.httpClient}/>
-                  <UploadForm />
+                  <UploadForm httpClient={this.props.httpClient}/>
                 </div>
               : <Redirect to="/login" /> }
             </Route>

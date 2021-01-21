@@ -13,6 +13,11 @@ class HttpClient {
         return await this.get('/getJobsList', accessToken)
     }
 
+    async getUploadUrl(fileName) {
+        let accessToken = await (await Auth.currentSession()).getIdToken().getJwtToken();
+        return await this.get('/getUploadUrl?filename=' + fileName, accessToken)
+    }
+
     async post(method, data, accessToken) {
 
         const url = this.endpoint + method;

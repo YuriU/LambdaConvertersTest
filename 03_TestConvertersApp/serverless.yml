@@ -121,6 +121,23 @@ functions:
             type: COGNITO_USER_POOLS
             authorizerId: { Ref: MyApiGatewayAuthorizer }
 
+  GetUploadUrl:
+    handler: Pipeline.GetUploadUrl::Pipeline.GetUploadUrl.GetUploadUrlHandler::GetUploadUrl
+    timeout: 15
+    package:
+      artifact: Backend/Pipeline.GetUploadUrl/bin/Release/netcoreapp3.1/Pipeline.GetUploadUrl.zip
+    environment:
+      UPLOAD_ORIGINAL_BUCKET_NAME: { Ref: UploadOriginalBucket }
+    events:
+      - http:
+          cors: true
+          path: /getUploadUrl
+          method: get
+          authorizer:
+            name: authorizer
+            type: COGNITO_USER_POOLS
+            authorizerId: { Ref: MyApiGatewayAuthorizer }
+
   #DummyConvert:
   #  image: <image>
   #  events:
