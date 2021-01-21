@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -36,14 +37,15 @@ namespace Pipeline.FileUploaded
                 {
                     try
                     {
-                        var originalFileName = record.S3.Object.Key;
+                        var originalFileKey = record.S3.Object.Key;
                         var jobId = Guid.NewGuid().ToString();
                         
                         // Creating job in DB
+                        var originalFileName = Path.GetFileName(originalFileKey);
                         await _jobsTable.AddJob(jobId, originalFileName, DateTime.UtcNow);
                         
                         // Move file to dedicated job table
-                        var srcFilePath = await MoveToDestinationBucket(jobId, record.S3.Bucket.Name, originalFileName);
+                        var srcFilePath = await MoveToDestinationBucket(jobId, record.S3.Bucket.Name, originalFileKey);
 
                         // Set original file path
                         await _jobsTable.SetOriginalFile(jobId, srcFilePath);
@@ -62,18 +64,19 @@ namespace Pipeline.FileUploaded
             }
         }
     
-        private async Task<string> MoveToDestinationBucket(string jobId, string originalBucket, string originalFileName)
+        private async Task<string> MoveToDestinationBucket(string jobId, string originalBucket, string originalFileKey)
         {
-            var originalFileKey = StorageUtils.MakeOriginalFilePath(jobId, originalFileName);
+            var originalFileName = Path.GetFileName(originalFileKey);
+            var destinationKey = StorageUtils.MakeOriginalFilePath(jobId, originalFileName);
             await S3Client.CopyObjectAsync(
                 originalBucket,
-                originalFileName,
+                originalFileKey,
                 _resultBucketName,
-                originalFileKey
+                destinationKey
                 );
 
-            await S3Client.DeleteObjectAsync(originalBucket, originalFileName);
-            return originalFileKey;
+            await S3Client.DeleteObjectAsync(originalBucket, originalFileKey);
+            return destinationKey;
         }
         private async Task PublishFileUploaded(string topic, string jobId, string key)
         {

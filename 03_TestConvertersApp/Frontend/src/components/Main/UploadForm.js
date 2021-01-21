@@ -25,11 +25,9 @@ class UploadForm extends Component {
     }
 
     async onClickHandler(){
-        const data = new FormData() 
-        data.append('file', this.state.selectedFile);
-
-        console.log(this.props);
-        const res = await this.props.httpClient.getUploadUrl("file.txt");
+        if(this.state.selectedFile){
+            await this.props.httpClient.uploadFile(this.state.selectedFile);
+        }
     }
 
     onChangeHandler(event) {

@@ -18,6 +18,27 @@ class HttpClient {
         return await this.get('/getUploadUrl?filename=' + fileName, accessToken)
     }
 
+    async uploadFile(file) {
+        var fileName = file.name;
+        var url = await this.getUploadUrl(fileName);
+
+        const headers = {
+            'Content-Type': file.type,
+            'Content-Length': file.size
+        };
+
+        try {
+            await fetch(url.Url, {
+                headers: headers,    
+                method: 'PUT',
+                body: file
+            });
+        }
+        catch(error) {
+            console.log(console.error())
+        }
+    }
+
     async post(method, data, accessToken) {
 
         const url = this.endpoint + method;
