@@ -12,6 +12,7 @@ import {
   Redirect
 } 
 from "react-router-dom";
+import UploadForm from './UploadForm';
 
 class MainScreen extends Component {
 
@@ -66,7 +67,10 @@ class MainScreen extends Component {
             </Route>
             <Route path="/">
               { authenticated 
-              ? <div className="container"><JobsList httpClient={this.props.httpClient}/></div>
+              ? <div className="container">
+                  <JobsList httpClient={this.props.httpClient}/>
+                  <UploadForm />
+                </div>
               : <Redirect to="/login" /> }
             </Route>
           </Switch>

@@ -1,10 +1,6 @@
-import { times } from "lodash";
 import React, { Component } from "react";
 
 class JobItem extends Component {
-
-
-
     constructor(props) {
         super(props);
         this.converters = [

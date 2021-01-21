@@ -18,6 +18,7 @@ h1 {
 html, body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     line-height: 1.7em;
+    height: 100vh;
 }
 
 .container {
@@ -73,6 +74,17 @@ html, body {
 
 .unknown {
     background-color: lightgrey;
+}
+
+.uploadPanel {
+    position: absolute;
+    bottom: 60px;
+    left: 0;
+    width: 100%;
+    background-color: darkgrey;
+    margin-top: 20px;
+    border-radius: 5px;
+    padding: 20px 0px;
 }
 
 .btn-download:focus {
