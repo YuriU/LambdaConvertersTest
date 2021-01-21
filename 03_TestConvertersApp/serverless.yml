@@ -55,6 +55,8 @@ provider:
       Resource:
         - !GetAtt ConversionJobsTable.Arn
         - { "Fn::Join" : [ "/", [{ "Fn::GetAtt" : [ConversionJobsTable, Arn] }, "index/*"] ]}
+        - !GetAtt WebSocketConnectionsTable.Arn
+        - { "Fn::Join" : [ "/", [{ "Fn::GetAtt" : [WebSocketConnectionsTable, Arn] }, "index/*"] ]}
 
 custom:
   stage: ${opt:stage, self:provider.stage}
@@ -138,6 +140,41 @@ functions:
             type: COGNITO_USER_POOLS
             authorizerId: { Ref: MyApiGatewayAuthorizer }
 
+  ###########################################################################
+  # WebSocket handlers
+  WebSocketConnect:
+    handler: Pipeline.WebSockets::Pipeline.WebSockets.WebSocketHandler::Connected
+    timeout: 15
+    package:
+      artifact: Backend/Pipeline.WebSockets/bin/Release/netcoreapp3.1/Pipeline.WebSockets.zip
+    environment:
+      CONNECTIONS_TABLE_NAME: { Ref: WebSocketConnectionsTable }
+    events:
+      - websocket:
+          route: $connect
+
+  WebSocketDisconnect:
+    handler: Pipeline.WebSockets::Pipeline.WebSockets.WebSocketHandler::Disconnected
+    timeout: 15
+    package:
+      artifact: Backend/Pipeline.WebSockets/bin/Release/netcoreapp3.1/Pipeline.WebSockets.zip
+    environment:
+      CONNECTIONS_TABLE_NAME: { Ref: WebSocketConnectionsTable }
+    events:
+      - websocket:
+          route: $disconnect
+
+  WebSocketDefault:
+    handler: Pipeline.WebSockets::Pipeline.WebSockets.WebSocketHandler::Default
+    timeout: 15
+    package:
+      artifact: Backend/Pipeline.WebSockets/bin/Release/netcoreapp3.1/Pipeline.WebSockets.zip
+    environment:
+      CONNECTIONS_TABLE_NAME: { Ref: WebSocketConnectionsTable }
+    events:
+      - websocket:
+          route: $default
+
   #DummyConvert:
   #  image: <image>
   #  events:
@@ -150,6 +187,8 @@ resources:
       Value: "${self:provider.region}"
     UploadOriginalBucket:
       Value: { Ref: UploadOriginalBucket }
+    UploadResultBucket:
+      Value: { Ref: UploadResultBucket }
     ResultBucket:
       Value: { Ref: ResultBucket }
     UserPoolId:

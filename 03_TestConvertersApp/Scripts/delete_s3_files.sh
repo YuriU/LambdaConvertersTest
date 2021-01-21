@@ -9,8 +9,10 @@ echo "Or press enter to continue"
 
 read
 
-echo "Deleting original upload files from ${STAGE}..."
+rmdir /tmp/empty
 mkdir /tmp/empty
+echo "Deleting original upload files from ${STAGE}..."
+
 
 BUCKET_NAME=$(aws \
     cloudformation describe-stacks \

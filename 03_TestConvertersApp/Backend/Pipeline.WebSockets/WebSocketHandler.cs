@@ -6,6 +6,7 @@ using Amazon.DynamoDBv2.Model;
 using Amazon.Lambda.APIGatewayEvents;
 using Amazon.Lambda.Core;
 
+[assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.Json.JsonSerializer))]
 namespace Pipeline.WebSockets
 {
     public class WebSocketHandler
@@ -49,15 +50,23 @@ namespace Pipeline.WebSockets
                 DeleteItemResponse ddbResponse = await _dynamoDbClient.DeleteItemAsync(ddbRequest);
                 return new APIGatewayProxyResponse {
                     StatusCode = 200,
-                    Body = "Connected."
+                    Body = "Disconnected."
                 };
             }
             catch (Exception e) {
                 return new APIGatewayProxyResponse {
                     StatusCode = 500,
-                    Body = $"Failed to connecting: {e.Message}"
+                    Body = $"Failed to disconnect: {e.Message}"
                 };
             }
+        }
+        
+        public async Task <APIGatewayProxyResponse> Default(APIGatewayProxyRequest request, ILambdaContext context)
+        {
+            return new APIGatewayProxyResponse {
+                StatusCode = 200,
+                Body = "Default."
+            };
         }
     }
 }
