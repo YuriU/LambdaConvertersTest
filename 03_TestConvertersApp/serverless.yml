@@ -52,6 +52,7 @@ provider:
       - dynamodb:Query
       - dynamodb:BatchWriteItem
       - dynamodb:UpdateItem
+      - dynamodb:DeleteItem
       Resource:
         - !GetAtt ConversionJobsTable.Arn
         - { "Fn::Join" : [ "/", [{ "Fn::GetAtt" : [ConversionJobsTable, Arn] }, "index/*"] ]}
@@ -175,6 +176,19 @@ functions:
       - websocket:
           route: $default
 
+  JobsTableStream:
+    handler: Pipeline.ProcessJobTableStream::Pipeline.ProcessJobTableStream.DBStreamHandler::ProcessEvent
+    timeout: 15
+    package:
+      artifact: Backend/Pipeline.ProcessJobTableStream/bin/Release/netcoreapp3.1/Pipeline.ProcessJobTableStream.zip
+    environment:
+      CONNECTIONS_TABLE_NAME: { Ref: WebSocketConnectionsTable }
+      WS_GATEWAY_ENDPOINT: { "Fn::Join" :["", ["https://", { Ref: WebsocketsApi }, ".execute-api.${self:provider.region}.amazonaws.com/${self:custom.stage}"]]}
+    events:
+      - stream:
+          type: dynamodb
+          arn: {"Fn::GetAtt": [ConversionJobsTable, StreamArn]}
+
   #DummyConvert:
   #  image: <image>
   #  events:
@@ -197,6 +211,8 @@ resources:
       Value: !Ref UserPoolClient
     HttpEndpoint:
       Value: { "Fn::Join" :["", ["https://", { Ref: ApiGatewayRestApi }, ".execute-api.${self:provider.region}.amazonaws.com/${self:custom.stage}"]]} 
+    WebSocketEndpoint:
+      Value: { "Fn::Join" :["", ["wss://", { Ref: WebsocketsApi }, ".execute-api.${self:provider.region}.amazonaws.com/${self:custom.stage}"]]}
 
   Resources:
     UploadOriginalBucket:
@@ -236,8 +252,10 @@ resources:
           - AttributeName: id
             KeyType: HASH
         ProvisionedThroughput:
-          ReadCapacityUnits: 1
+          ReadCapacityUnits: 2
           WriteCapacityUnits: 1
+        StreamSpecification:
+          StreamViewType: NEW_IMAGE
 
     WebSocketConnectionsTable:
       Type: "AWS::DynamoDB::Table"

@@ -17,6 +17,12 @@ HTTP_ENDPOINT=$(aws \
     --query "Stacks[0].Outputs[?OutputKey=='HttpEndpoint'] | [0].OutputValue" \
     --output text)
 
+WS_ENDPOINT=$(aws \
+    cloudformation describe-stacks \
+    --stack-name "testconvertersapp-${STAGE}" \
+    --query "Stacks[0].Outputs[?OutputKey=='WebSocketEndpoint'] | [0].OutputValue" \
+    --output text)
+
 USER_POOL_ID=$(aws \
     cloudformation describe-stacks \
     --stack-name "testconvertersapp-${STAGE}" \
@@ -30,6 +36,7 @@ USER_POOL_CLIENT_ID=$(aws \
     --output text)
 
 echo ${HTTP_ENDPOINT}
+echo ${WS_ENDPOINT}
 echo ${REGION}
 echo ${USER_POOL_ID}
 echo ${USER_POOL_CLIENT_ID}
@@ -37,6 +44,7 @@ echo ${USER_POOL_CLIENT_ID}
 echo "const Config = {
     Region: \"${REGION}\",
     BackendHttpEndpoint: \"${HTTP_ENDPOINT}\",
+    BackendWebSocketEndpoint: \"${WS_ENDPOINT}\",
     UserPoolId: \"${USER_POOL_ID}\",
     UserPoolClientId: \"${USER_POOL_CLIENT_ID}\"
 }
