@@ -1,17 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using Amazon.DynamoDBv2;
-using Amazon.DynamoDBv2.Model;
 using Amazon.Lambda.APIGatewayEvents;
 using Amazon.Lambda.Core;
+using Pipeline.Data;
 
 [assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.Json.JsonSerializer))]
 namespace Pipeline.WebSockets
 {
     public class WebSocketHandler
     {
-        private readonly string _connectionTableName = Environment.GetEnvironmentVariable("CONNECTIONS_TABLE_NAME");
+        private readonly ActiveConnectionsTable _activeConnectionsTable = new ActiveConnectionsTable(Environment.GetEnvironmentVariable("CONNECTIONS_TABLE_NAME"));
 
         private readonly IAmazonDynamoDB _dynamoDbClient = new AmazonDynamoDBClient();
         
@@ -20,17 +19,14 @@ namespace Pipeline.WebSockets
             try 
             {
                 var connectionId = request.RequestContext.ConnectionId;
-                PutItemRequest ddbRequest = new PutItemRequest {
-                    TableName = _connectionTableName,
-                    Item = new Dictionary<string, AttributeValue> {{ "connectionId", new AttributeValue { S = connectionId }}}
-                };
-                PutItemResponse ddbResponse = await _dynamoDbClient.PutItemAsync(ddbRequest);
+                await _activeConnectionsTable.AddActiveConnection(connectionId);
                 return new APIGatewayProxyResponse {
                     StatusCode = 200,
                     Body = "Connected."
                 };
             }
-            catch (Exception e) {
+            catch (Exception e) 
+            {
                 return new APIGatewayProxyResponse {
                     StatusCode = 500,
                     Body = $"Failed to connecting: {e.Message}"
@@ -43,17 +39,14 @@ namespace Pipeline.WebSockets
             try 
             {
                 var connectionId = request.RequestContext.ConnectionId;
-                DeleteItemRequest ddbRequest = new DeleteItemRequest {
-                    TableName = _connectionTableName,
-                    Key = new Dictionary<string, AttributeValue> {{ "connectionId", new AttributeValue { S = connectionId }}}
-                };
-                DeleteItemResponse ddbResponse = await _dynamoDbClient.DeleteItemAsync(ddbRequest);
+                await _activeConnectionsTable.RemoveActiveConnection(connectionId);
                 return new APIGatewayProxyResponse {
                     StatusCode = 200,
                     Body = "Disconnected."
                 };
             }
-            catch (Exception e) {
+            catch (Exception e) 
+            {
                 return new APIGatewayProxyResponse {
                     StatusCode = 500,
                     Body = $"Failed to disconnect: {e.Message}"
