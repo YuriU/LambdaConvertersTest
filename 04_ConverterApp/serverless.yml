@@ -1,19 +1,43 @@
 service: testconverter
 frameworkVersion: '2'
 
+plugins:
+  - serverless-pseudo-parameters
+
 provider:
   name: aws
   region: eu-central-1
   memorySize: 128
   lambdaHashingVersion: 20201221
 
-#functions:
-#  Converter:
-#    handler: handler.hello
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - sqs:SendMessage
+      Resource:
+        - { "Fn::Join" : [ ":", [ "arn:aws:sqs", "${self:provider.region}", "#{AWS::AccountId}" ,"${self:custom.extra.ResultNotificationQueue}"] ]}
+    - Effect: Allow
+      Action:
+        - s3:GetObject
+      Resource:
+        - { "Fn::Join" : [ "", [ "arn:aws:s3:::", "${self:custom.extra.OriginalBucketName}", "/*"] ]}
+    - Effect: Allow
+      Action:
+        - s3:PutObject
+      Resource:
+        - { "Fn::Join" : [ "", [ "arn:aws:s3:::", "${self:custom.extra.ResultBucketName}", "/*"] ]}
 
-#    Define function environment variables here
-#    environment:
-#      variable2: value2
+functions:
+  Converter:
+    image: ${self:custom.extra.Image}
+    timeout: 15
+    environment:
+      CONVERTER_NAME: ${self:custom.extra.Name}
+      RESULT_NOTIFICATION_QUEUE: { "Fn::Join" : [ "", [ "https://sqs.", "${self:provider.region}" ,".amazonaws.com/", "#{AWS::AccountId}" , "/" ,"${self:custom.extra.ResultNotificationQueue}"] ]}
+      RESULT_BUCKET_NAME: ${self:custom.extra.ResultBucketName}
+    events:
+     - sqs:
+         arn: !GetAtt ConvertFileQueue.Arn
 
 custom:
   stage: ${opt:stage, self:provider.stage}
