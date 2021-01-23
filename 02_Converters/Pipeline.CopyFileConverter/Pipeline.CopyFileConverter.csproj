@@ -3,6 +3,8 @@
     <PropertyGroup>
         <TargetFramework>netcoreapp3.1</TargetFramework>
 	    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+	    <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
+	    <AWSProjectType>Lambda</AWSProjectType>
     </PropertyGroup>
 
     <ItemGroup>
