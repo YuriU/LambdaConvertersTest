@@ -246,3 +246,4 @@ _Pvt_Extensions
 .serverless
 /03_TestConvertersApp/Frontend/dist
 /03_TestConvertersApp/Frontend/src/config.js
+package-lock.json
