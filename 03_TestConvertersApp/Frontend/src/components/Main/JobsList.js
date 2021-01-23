@@ -37,7 +37,7 @@ class JobsList extends Component {
     }
 
     onMessage(event){
-        console.log(event);
+        console.log(event.data);
         const jobUpdates = JSON.parse(event.data);
         var jobs = this.state.jobs;
         jobUpdates.forEach(update => {
@@ -48,7 +48,19 @@ class JobsList extends Component {
             if(!existed) {
                 jobs.push(update);
             } else {
-                existed.ConversionStatuses = update.ConversionStatuses;
+
+                for (const [key, value] of Object.entries(update.ConversionStatuses)) {
+                    console.log(key)
+                    console.log(update.ConversionStatuses[key])
+                    if(existed.ConversionStatuses[key]){
+                        existed.ConversionStatuses[key].Successful = update.ConversionStatuses[key].Successful;
+                    }
+                    else {
+                        existed.ConversionStatuses[key] = update.ConversionStatuses[key];
+                    }
+                    
+                    
+                }
             }
         });
 

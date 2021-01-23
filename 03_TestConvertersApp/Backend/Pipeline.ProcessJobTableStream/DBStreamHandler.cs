@@ -59,7 +59,6 @@ namespace Pipeline.ProcessJobTableStream
             foreach (var kvp in record["conversionResults"].M)
             {
                 var key = kvp.Key;
-                jobDto.ConversionStatuses = new Dictionary<string, ConversionStatus>();
                 jobDto.ConversionStatuses[key] = new ConversionStatus
                 {
                     Successful = kvp.Value.M["sucessful"].BOOL
