@@ -38,15 +38,18 @@ namespace Pipeline.ProcessResult
                     var fileName = await _jobsTable.GetFileName(jobId);
                     var convertedKey = StorageUtils.MakeConvertedFilePath(jobId, fileName, result.Converter, Path.GetExtension(result.ResultKey));
 
-                    await S3Client.CopyObjectAsync(
-                        _uploadResultBucketName,
-                        result.ResultKey,
-                        _resultBucketName,
-                        convertedKey
-                    );
+                    if (result.Sucessful)
+                    {
+                        await S3Client.CopyObjectAsync(
+                            _uploadResultBucketName,
+                            result.ResultKey,
+                            _resultBucketName,
+                            convertedKey
+                        );
+                        
+                        await S3Client.DeleteObjectAsync(_uploadResultBucketName, result.ResultKey);
+                    }
                     
-                    await S3Client.DeleteObjectAsync(_uploadResultBucketName, result.ResultKey);
-
                     await _jobsTable.SetConversionResult(jobId, result.Converter, result.Sucessful, convertedKey);
                 }
             }
