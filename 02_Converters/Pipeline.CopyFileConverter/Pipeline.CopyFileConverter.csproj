@@ -2,8 +2,7 @@
 
     <PropertyGroup>
         <TargetFramework>netcoreapp3.1</TargetFramework>
-        <OutputType>Exe</OutputType>
-        <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+	    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     </PropertyGroup>
 
     <ItemGroup>

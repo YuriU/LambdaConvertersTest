@@ -2,15 +2,6 @@
 
 FROM mcr.microsoft.com/dotnet/core/runtime:3.1-buster-slim AS base
 
-# Install aws-lambda-cpp build dependencies
-RUN apt-get update && \
-  apt-get install -y \
-  g++ \
-  make \
-  cmake \
-  unzip \
-  libcurl4-openssl-dev
-
 WORKDIR /app
 
 FROM mcr.microsoft.com/dotnet/core/sdk:3.1-buster AS build
@@ -22,12 +13,18 @@ COPY ["Pipeline.BaseConverterLambda/Pipeline.BaseConverterLambda.csproj", "Pipel
 RUN dotnet restore "Pipeline.CopyFileConverter/Pipeline.CopyFileConverter.csproj"
 COPY . .
 WORKDIR "/src/Pipeline.CopyFileConverter"
-RUN dotnet build "Pipeline.CopyFileConverter.csproj" -c Release -o /app/build
+RUN dotnet build "Pipeline.CopyFileConverter.csproj"  -c Release -o /app/build
 
 FROM build AS publish
-RUN dotnet publish "Pipeline.CopyFileConverter.csproj" -c Release -o /app/publish
+RUN dotnet publish "Pipeline.CopyFileConverter.csproj" \
+		-c Release \
+		--runtime linux-x64 \
+		--self-contained false \ 
+		-o /app/publish \
+		-p:PublishReadyToRun=true
+		
 
 FROM base AS final
-WORKDIR /app
+WORKDIR /var/task
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "Pipeline.CopyFileConverter.dll"]
+CMD [ "Pipeline.CopyFileConverter::Pipeline.CopyFileConverter.CopyFileConverter::Process" ]

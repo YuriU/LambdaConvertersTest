@@ -1,0 +1,1 @@
+docker build -t copyconverter -f Pipeline.CopyFileConverter/Dockerfile .
