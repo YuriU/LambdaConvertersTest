@@ -13,9 +13,14 @@ class HttpClient {
         return await this.get('/getJobsList', accessToken)
     }
 
-    async downloadResult(jobId) {
+    async getDownloadUrl(jobId,converter) {
         let accessToken = await (await Auth.currentSession()).getIdToken().getJwtToken();
-        return await this.get('/downloadResult?id=' + jobId, accessToken)
+        if(converter){
+            return await this.get('/getDownloadUrl?id=' + jobId + '&converter=' + converter, accessToken)
+        }
+        else {
+            return await this.get('/getDownloadUrl?id=' + jobId, accessToken)
+        }
     }
 
     async getUploadUrl(fileName) {
