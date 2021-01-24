@@ -123,6 +123,24 @@ functions:
             type: COGNITO_USER_POOLS
             authorizerId: { Ref: MyApiGatewayAuthorizer }
 
+  DownloadResult:
+    handler: Pipeline.DownloadResult::Pipeline.DownloadResult.DownloadResultHandler::DownloadResult
+    timeout: 15
+    package:
+      artifact: Backend/Pipeline.DownloadResult/bin/Release/netcoreapp3.1/Pipeline.DownloadResult.zip
+    environment:
+      RESULT_BUCKET_NAME: { Ref: ResultBucket }
+      CONVERSION_JOBS_TABLE_NAME: { Ref: ConversionJobsTable }
+    events:
+      - http:
+          cors: true
+          path: /downloadResult
+          method: get
+          #authorizer:
+          #  name: authorizer
+          #  type: COGNITO_USER_POOLS
+          #  authorizerId: { Ref: MyApiGatewayAuthorizer }
+
   GetUploadUrl:
     handler: Pipeline.GetUploadUrl::Pipeline.GetUploadUrl.GetUploadUrlHandler::GetUploadUrl
     timeout: 15

@@ -94,6 +94,38 @@ namespace Pipeline.Data
             
             return item.Item["fileName"].S;
         }
+        
+        public async Task<ConversionJobFullInfo> GetJob(string jobId)
+        {
+            var job = await _dynamoDbClient.GetItemAsync(new GetItemRequest
+            {
+                Key = new Dictionary<string, AttributeValue> {{"id", new AttributeValue { S = jobId }}},
+                TableName = _tableName,
+                AttributesToGet = new List<string> {"id", "fileName", "started", "original", "conversionResults"}
+            });
+
+            if (job.Item != null)
+            {
+                return new ConversionJobFullInfo
+                {
+                    JobId = job.Item["id"].S,
+                    FileName = job.Item["fileName"].S,
+                    Started = long.Parse(job.Item["started"].N),
+                    OriginalKey = job.Item["original"].M["key"].S,
+                    ConversionStatuses = job.Item["conversionResults"].M.ToDictionary(
+                        p => p.Key,
+                        p => new ConversionResult
+                        {
+                            Successful = p.Value.M["sucessful"].BOOL,
+                            Key = p.Value.M["key"].S
+                        })
+                };
+            }
+            else
+            {
+                return null;
+            }
+        }
 
         public async Task<List<ConversionJobDto>> GetJobDtos()
         {
