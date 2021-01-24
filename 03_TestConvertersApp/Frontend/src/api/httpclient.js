@@ -1,5 +1,6 @@
 import Config from '../config'
 import { Auth } from 'aws-amplify';
+import JSZip from 'jszip'
 
 
 class HttpClient {
@@ -21,6 +22,67 @@ class HttpClient {
         else {
             return await this.get('/getDownloadUrl?id=' + jobId, accessToken)
         }
+    }
+
+    async download(jobId, converter) {
+        const self = this;
+        const urls = await this.getDownloadUrl(jobId, converter);
+        Promise.all(
+            urls.map(url =>
+              fetch(url)
+                .then(res => res.blob())
+                .then(res => Promise.resolve({ fileName: self.getFileName(url), blob : res }))
+            )
+          ).then(members => {
+                if(members.length == 1) {
+                    self.downloadBlob(members[0].blob, members[0].fileName);
+                }
+                else {
+                    var zip = new JSZip();
+                    var count = 0;
+                    members.forEach((p) => {
+                        self.blobToBase64(p.blob, function (binaryData) {
+                            if(count < members.length - 1) {
+                                zip.file(p.fileName, binaryData, {base64: true});
+                                count++;
+                            }
+                            else{
+                                zip.generateAsync({type:"blob"})
+                                .then(function(content) {
+                                    self.downloadBlob(content, 'file.zip');
+                                });
+                            }
+                        })
+                    })
+                }
+          });
+    }
+
+    blobToBase64(blob, callback) {
+        var reader = new FileReader();
+        reader.onload = function() {
+            var dataUrl = reader.result;
+            var base64 = dataUrl.split(',')[1];
+            callback(base64);
+        };
+        reader.readAsDataURL(blob);
+    }
+
+    downloadBlob(blob, fileName){
+        var link = document.createElement('a');
+        link.href = window.URL.createObjectURL(blob);
+        link.download = fileName;
+
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    getFileName(url) {
+        const indexOfQuestionMark = url.indexOf('?');
+        var path =  url.substring(0, indexOfQuestionMark);
+        var indexOfLastSlash = path.lastIndexOf('/');
+        return path.substring(indexOfLastSlash + 1);
     }
 
     async getUploadUrl(fileName) {
