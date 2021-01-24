@@ -7,7 +7,7 @@ plugins:
 provider:
   name: aws
   region: eu-central-1
-  memorySize: 128
+  memorySize: 512
   lambdaHashingVersion: 20201221
 
   iamRoleStatements:
@@ -30,7 +30,7 @@ provider:
 functions:
   Converter:
     image: ${self:custom.extra.Image}
-    timeout: 15
+    timeout: 60
     environment:
       CONVERTER_NAME: ${self:custom.extra.Name}
       RESULT_NOTIFICATION_QUEUE: { "Fn::Join" : [ "", [ "https://sqs.", "${self:provider.region}" ,".amazonaws.com/", "#{AWS::AccountId}" , "/" ,"${self:custom.extra.ResultNotificationQueue}"] ]}
@@ -47,6 +47,8 @@ resources:
   Resources:
     ConvertFileQueue:
       Type: "AWS::SQS::Queue"
+      Properties:
+        VisibilityTimeout: 90
 
     ConvertFileQueuePolicy:
       Type: "AWS::SQS::QueuePolicy"
