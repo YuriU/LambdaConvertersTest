@@ -136,10 +136,10 @@ functions:
           cors: true
           path: /getDownloadUrl
           method: get
-          #authorizer:
-          #  name: authorizer
-          #  type: COGNITO_USER_POOLS
-          #  authorizerId: { Ref: MyApiGatewayAuthorizer }
+          authorizer:
+            name: authorizer
+            type: COGNITO_USER_POOLS
+            authorizerId: { Ref: MyApiGatewayAuthorizer }
 
   GetUploadUrl:
     handler: Pipeline.GetUploadUrl::Pipeline.GetUploadUrl.GetUploadUrlHandler::GetUploadUrl
