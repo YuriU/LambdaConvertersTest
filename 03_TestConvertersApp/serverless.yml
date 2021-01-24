@@ -123,18 +123,18 @@ functions:
             type: COGNITO_USER_POOLS
             authorizerId: { Ref: MyApiGatewayAuthorizer }
 
-  DownloadResult:
-    handler: Pipeline.DownloadResult::Pipeline.DownloadResult.DownloadResultHandler::DownloadResult
+  GetDownloadUrl:
+    handler: Pipeline.GetDownloadUrl::Pipeline.GetDownloadUrl.GetDownloadUrlHandler::GetDownloadUrl
     timeout: 15
     package:
-      artifact: Backend/Pipeline.DownloadResult/bin/Release/netcoreapp3.1/Pipeline.DownloadResult.zip
+      artifact: Backend/Pipeline.GetDownloadUrl/bin/Release/netcoreapp3.1/Pipeline.GetDownloadUrl.zip
     environment:
       RESULT_BUCKET_NAME: { Ref: ResultBucket }
       CONVERSION_JOBS_TABLE_NAME: { Ref: ConversionJobsTable }
     events:
       - http:
           cors: true
-          path: /downloadResult
+          path: /getDownloadUrl
           method: get
           #authorizer:
           #  name: authorizer
@@ -250,6 +250,16 @@ resources:
 
     ResultBucket:
       Type: "AWS::S3::Bucket"
+      Properties:
+         CorsConfiguration:
+            CorsRules:
+              -
+                AllowedOrigins: 
+                  - "*"
+                AllowedMethods: 
+                  - GET
+                AllowedHeaders: 
+                  - "*"
 
     FileUploadedTopic:
       Type: "AWS::SNS::Topic"

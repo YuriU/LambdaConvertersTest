@@ -8,4 +8,4 @@ set -eu
 (cd ./Backend/Pipeline.GetUploadUrl && ./build.sh)
 (cd ./Backend/Pipeline.WebSockets && ./build.sh)
 (cd ./Backend/Pipeline.ProcessJobTableStream && ./build.sh)
-(cd ./Backend/Pipeline.DownloadResult && ./build.sh)
+(cd ./Backend/Pipeline.GetDownloadUrl && ./build.sh)
