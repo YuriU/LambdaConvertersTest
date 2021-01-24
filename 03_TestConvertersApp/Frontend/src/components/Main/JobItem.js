@@ -33,9 +33,10 @@ class JobItem extends Component {
                     <a href="load">{this.props.job.FileName}</a>
                 </p>
                 { this.converters.map((converter, index) => {
-                   return(<button className={"btn-download " + this.computeStyle(converter)} key={index}>{converter}</button>)
+                   return(<button className={"btn-download " + this.computeStyle(converter)} key={converter}>{converter}</button>)
                 })}
-                <button className="btn-download success">All</button>
+                <button className="btn-download success">Download</button>
+                <button className="btn-download success">Delete</button>
             </div>
         </div>);
     }

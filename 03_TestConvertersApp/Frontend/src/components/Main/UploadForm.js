@@ -25,9 +25,14 @@ class UploadForm extends Component {
     }
 
     async onClickHandler(){
-        if(this.state.selectedFile){
-            await this.props.httpClient.uploadFile(this.state.selectedFile);
+        try {
+            if(this.state.selectedFile) {
+                await this.props.httpClient.uploadFile(this.state.selectedFile);
+            }
         }
+        catch {
+        }
+        
     }
 
     onChangeHandler(event) {
