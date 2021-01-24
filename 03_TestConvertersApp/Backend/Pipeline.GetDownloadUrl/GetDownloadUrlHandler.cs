@@ -14,9 +14,10 @@ using Newtonsoft.Json;
 using Pipeline.Data;
 
 [assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.Json.JsonSerializer))]
-namespace Pipeline.DownloadResult
+namespace Pipeline.GetDownloadUrl
+
 {
-    public class DownloadResultHandler
+    public class GetDownloadUrlHandler
     {
         private readonly JobsTable _jobsTable = new JobsTable(Environment.GetEnvironmentVariable("CONVERSION_JOBS_TABLE_NAME"));
         
@@ -24,52 +25,55 @@ namespace Pipeline.DownloadResult
         
         private static AmazonS3Client S3Client = new AmazonS3Client();
         
-        public async Task<APIGatewayProxyResponse> DownloadResult(APIGatewayProxyRequest request, ILambdaContext context)
+        public async Task<APIGatewayProxyResponse> GetDownloadUrl(APIGatewayProxyRequest request, ILambdaContext context)
         {
             var id = request.QueryStringParameters["id"];
+            
             var job = await _jobsTable.GetJob(id);
-
-            
-            LambdaLogger.Log(_resultBucketName);
-
-            var jobDirectoryPath = Path.Combine(Path.GetTempPath(), id);
-            LambdaLogger.Log(jobDirectoryPath);
-            Directory.CreateDirectory(jobDirectoryPath);
-            
-
-            await DownloadFile(_resultBucketName, job.OriginalKey, Path.Combine(jobDirectoryPath, Path.GetFileName(job.OriginalKey)));
-            foreach (var kvp in 
-                job.ConversionStatuses
-                    .Where(s => s.Value.Successful))
+            List<string> urls = new List<string>();
+            if (request.QueryStringParameters.ContainsKey("converter"))
             {
-                await DownloadFile(_resultBucketName, kvp.Value.Key, Path.Combine(jobDirectoryPath, Path.GetFileName(kvp.Value.Key)));
+                var converterName = request.QueryStringParameters["converter"];
+                // Add check for errors
+                var converterFileKey = job.ConversionStatuses[converterName].Key;
+
+                var url = S3Client.GetPreSignedURL(new GetPreSignedUrlRequest()
+                {
+                    Expires = DateTime.Now.AddSeconds(30),
+                    BucketName = _resultBucketName,
+                    Key = converterFileKey,
+                });
+                urls.Add(url);
+            }
+            else
+            {
+                var keys = job.ConversionStatuses
+                    .Where(s => s.Value.Successful)
+                    .Select(r => r.Value.Key)
+                    .ToList();
+
+                foreach (var key in keys)
+                {
+                    var url = S3Client.GetPreSignedURL(new GetPreSignedUrlRequest()
+                    {
+                        Expires = DateTime.Now.AddSeconds(60),
+                        BucketName = _resultBucketName,
+                        Key = key,
+                    });
+                    
+                    urls.Add(url);
+                }
             }
 
-            var files = Directory.GetFiles(jobDirectoryPath);
-            var inmemoryFiles = files.Select(f => new InMemoryFile
-            {
-                FileName = f,
-                Content = File.ReadAllBytes(f)
-            }).ToList();
-
-            var zipArchiveBytes = GetZipArchive(inmemoryFiles);
-
-            var zipFilePath = Path.Combine(jobDirectoryPath, $"{job}.zip");
-            File.WriteAllBytes(zipFilePath, zipArchiveBytes);
-
-            await UploadFile(zipFilePath, _resultBucketName, Path.GetFileName(zipFilePath));
-            
             return new APIGatewayProxyResponse
             {
                 StatusCode = (int)HttpStatusCode.OK,
-                Body = Convert.ToBase64String(zipArchiveBytes),
+                Body = JsonConvert.SerializeObject(urls),
                 IsBase64Encoded = true,
                 Headers = new Dictionary<string, string>
                 { 
-                    { "Content-Type", "application/zip" }, 
+                    { "Content-Type", "application/json" }, 
                     { "Access-Control-Allow-Origin", "*" },
-                    { "Access-Control-Expose-Headers", "Content-Disposition" },
-                    { "Content-Disposition", $"attachment; filename=\"{id}.zip\"" }
                 }
             };
         }
