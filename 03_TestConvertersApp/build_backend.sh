@@ -9,3 +9,4 @@ set -eu
 (cd ./Backend/Pipeline.WebSockets && ./build.sh)
 (cd ./Backend/Pipeline.ProcessJobTableStream && ./build.sh)
 (cd ./Backend/Pipeline.GetDownloadUrl && ./build.sh)
+(cd ./Backend/Pipeline.DeleteJob && ./build.sh)

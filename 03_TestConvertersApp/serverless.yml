@@ -158,6 +158,24 @@ functions:
             type: COGNITO_USER_POOLS
             authorizerId: { Ref: MyApiGatewayAuthorizer }
 
+  DeleteJob:
+    handler: Pipeline.DeleteJob::Pipeline.DeleteJob.DeleteJobHandler::DeleteJob
+    timeout: 15
+    package:
+      artifact: Backend/Pipeline.DeleteJob/bin/Release/netcoreapp3.1/Pipeline.DeleteJob.zip
+    environment:
+      UPLOAD_ORIGINAL_BUCKET_NAME: { Ref: UploadOriginalBucket }
+      CONVERSION_JOBS_TABLE_NAME: { Ref: ConversionJobsTable }
+    events:
+      - http:
+          cors: true
+          path: /deleteJob
+          method: delete
+          authorizer:
+            name: authorizer
+            type: COGNITO_USER_POOLS
+            authorizerId: { Ref: MyApiGatewayAuthorizer }
+
   ###########################################################################
   # WebSocket handlers
   WebSocketConnect:
