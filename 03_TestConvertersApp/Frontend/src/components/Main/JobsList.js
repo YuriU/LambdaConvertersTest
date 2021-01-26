@@ -13,6 +13,7 @@ class JobsList extends Component {
         };
 
         this.onMessage = this.onMessage.bind(this);
+        this.deleteJob = this.deleteJob.bind(this);
         this.socket.onMessage(this.onMessage)
     }
 
@@ -31,9 +32,19 @@ class JobsList extends Component {
     render() {
         return(<div>
             {this.state.jobs.map((item, index) => {
-                return (<JobItem job={item} key={item.JobId} httpClient={this.props.httpClient} />)
+                return (<JobItem job={item} key={item.JobId} onDeleted={this.deleteJob} httpClient={this.props.httpClient} />)
             })}
         </div>);
+    }
+
+    deleteJob(jobId) {
+        const jobs = this.state.jobs.filter((job) => {
+            job.JobId != jobId
+        })
+
+        this.setState({
+            jobs
+        })
     }
 
     onMessage(event){
@@ -58,8 +69,6 @@ class JobsList extends Component {
                     else {
                         existed.ConversionStatuses[key] = update.ConversionStatuses[key];
                     }
-                    
-                    
                 }
             }
         });

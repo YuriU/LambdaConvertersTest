@@ -24,6 +24,7 @@ class HttpClient {
         }
     }
 
+
     async download(jobId, converter) {
         const self = this;
         const urls = await this.getDownloadUrl(jobId, converter);
@@ -85,6 +86,11 @@ class HttpClient {
         return path.substring(indexOfLastSlash + 1);
     }
 
+    async deleteJob(jobId) {
+        let accessToken = await (await Auth.currentSession()).getIdToken().getJwtToken();
+        return await this.delete('/deleteJob?id=' + jobId, accessToken)
+    }
+
     async getUploadUrl(fileName) {
         let accessToken = await (await Auth.currentSession()).getIdToken().getJwtToken();
         return await this.get('/getUploadUrl?filename=' + fileName, accessToken)
@@ -143,6 +149,24 @@ class HttpClient {
 
         let response = await fetch(url, {
             method: 'GET',
+            headers: headers,    
+        })
+
+        const result = await response.json();
+        return result;
+    }
+
+    async delete(method, accessToken) {
+
+        const url = this.endpoint + method;
+
+        const headers = {};
+        if(accessToken) {
+            headers['Authorization'] = accessToken;
+        }
+
+        let response = await fetch(url, {
+            method: 'DELETE',
             headers: headers,    
         })
 

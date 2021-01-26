@@ -66,12 +66,15 @@ class MainScreen extends Component {
               <Login updateLoginState={this.updateLoginState} history={this.props.history} />
             </Route>
             <Route path="/">
-              { authenticated 
-              ? <div className="container">
+              { authenticated &&
+                 <div className="container">
                   <JobsList httpClient={this.props.httpClient}/>
                   <UploadForm httpClient={this.props.httpClient}/>
-                </div>
-              : <Redirect to="/login" /> }
+                </div>}
+              {
+                !authenticated &&
+                <Login updateLoginState={this.updateLoginState} history={this.props.history} />
+              }
             </Route>
           </Switch>
         </Router>)
@@ -97,7 +100,7 @@ class MainScreen extends Component {
             </ul>
           </nav>
           {
-            this.renderContent(true)
+            this.renderContent(this.state.authenticated)
           }
           <footer className="footer">
               <span className="text-muted">Yurii Ulianets 2020. Powered by <a href="https://aws.amazon.com/">AWS</a>,<a href="https://serverless.com/">Serverless</a>,<a href="https://reactjs.org/">React</a> and <a href="https://aws-amplify.github.io/docs/js/authentication">AmplifyJS</a></span>
