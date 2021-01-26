@@ -23,7 +23,6 @@ namespace Pipeline.ProcessJobTableStream
         private readonly AmazonApiGatewayManagementApiClient _apiClient = new AmazonApiGatewayManagementApiClient(new AmazonApiGatewayManagementApiConfig()
         {
             ServiceURL = Environment.GetEnvironmentVariable("WS_GATEWAY_ENDPOINT"),
-            
         });
         
         public async Task ProcessEvent(DynamoDBEvent dynamoDbEvent, ILambdaContext context)

@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.IO.Compression;
 using System.Linq;
 using System.Net;
-using System.Threading;
 using System.Threading.Tasks;
 using Amazon.Lambda.APIGatewayEvents;
 using Amazon.Lambda.Core;
@@ -37,7 +34,7 @@ namespace Pipeline.GetDownloadUrl
                 // Add check for errors
                 var converterFileKey = job.ConversionStatuses[converterName].Key;
 
-                var url = S3Client.GetPreSignedURL(new GetPreSignedUrlRequest()
+                var url = S3Client.GetPreSignedURL(new GetPreSignedUrlRequest
                 {
                     Expires = DateTime.Now.AddSeconds(30),
                     BucketName = _resultBucketName,
@@ -54,7 +51,7 @@ namespace Pipeline.GetDownloadUrl
 
                 foreach (var key in keys)
                 {
-                    var url = S3Client.GetPreSignedURL(new GetPreSignedUrlRequest()
+                    var url = S3Client.GetPreSignedURL(new GetPreSignedUrlRequest
                     {
                         Expires = DateTime.Now.AddSeconds(60),
                         BucketName = _resultBucketName,
@@ -76,48 +73,6 @@ namespace Pipeline.GetDownloadUrl
                     { "Access-Control-Allow-Origin", "*" },
                 }
             };
-        }
-        
-        private static async Task DownloadFile(string srcBucket, string srcKey, string destFileName)
-        {
-            var request = new GetObjectRequest { BucketName = srcBucket, Key = srcKey };
-            using (GetObjectResponse response = await S3Client.GetObjectAsync(request))
-            {
-                await response.WriteResponseStreamToFileAsync(destFileName, false, CancellationToken.None);
-            }
-        }
-        
-        public static byte[] GetZipArchive(List<InMemoryFile> files)
-        {
-            byte[] archiveFile;
-            using (var archiveStream = new MemoryStream())
-            {
-                using (var archive = new ZipArchive(archiveStream, ZipArchiveMode.Create, true))
-                {
-                    foreach (var file in files)
-                    {
-                        var zipArchiveEntry = archive.CreateEntry(file.FileName, CompressionLevel.Fastest);
-                        using (var zipStream = zipArchiveEntry.Open())
-                            zipStream.Write(file.Content, 0, file.Content.Length);
-                    }
-                }
-
-                archiveFile = archiveStream.ToArray();
-            }
-
-            return archiveFile;
-        }
-
-        public class InMemoryFile
-        {
-            public string FileName { get; set; }
-            public byte[] Content { get; set; }
-        }
-        
-        private static async Task UploadFile(string srcFileName, string destBucket, string destFileName)
-        {
-            var request = new PutObjectRequest { BucketName = destBucket, Key = destFileName, FilePath = srcFileName };
-            var response = await S3Client.PutObjectAsync(request, CancellationToken.None);
         }
     }
 }

@@ -126,6 +126,15 @@ namespace Pipeline.Data
                 return null;
             }
         }
+        
+        public async Task DeleteJob(string jobId)
+        {
+            var job = await _dynamoDbClient.DeleteItemAsync(new DeleteItemRequest
+            {
+                Key = new Dictionary<string, AttributeValue> {{"id", new AttributeValue { S = jobId }}},
+                TableName = _tableName,
+            });
+        }
 
         public async Task<List<ConversionJobDto>> GetJobDtos()
         {
