@@ -186,10 +186,8 @@ functions:
   ###########################################################################
   # WebSocket handlers
   WebSocketConnect:
-    handler: Pipeline.WebSockets::Pipeline.WebSockets.WebSocketHandler::Connected
-    timeout: 15
-    package:
-      artifact: Backend_dotnet/Pipeline.WebSockets/bin/Release/netcoreapp3.1/Pipeline.WebSockets.zip
+    runtime: nodejs12.x
+    handler: Backend_node/web_socket_handler.connectHandler
     environment:
       CONNECTIONS_TABLE_NAME: { Ref: WebSocketConnectionsTable }
     events:
@@ -197,10 +195,8 @@ functions:
           route: $connect
 
   WebSocketDisconnect:
-    handler: Pipeline.WebSockets::Pipeline.WebSockets.WebSocketHandler::Disconnected
-    timeout: 15
-    package:
-      artifact: Backend_dotnet/Pipeline.WebSockets/bin/Release/netcoreapp3.1/Pipeline.WebSockets.zip
+    runtime: nodejs12.x
+    handler: Backend_node/web_socket_handler.disconnectHandler
     environment:
       CONNECTIONS_TABLE_NAME: { Ref: WebSocketConnectionsTable }
     events:
@@ -208,10 +204,8 @@ functions:
           route: $disconnect
 
   WebSocketDefault:
-    handler: Pipeline.WebSockets::Pipeline.WebSockets.WebSocketHandler::Default
-    timeout: 15
-    package:
-      artifact: Backend_dotnet/Pipeline.WebSockets/bin/Release/netcoreapp3.1/Pipeline.WebSockets.zip
+    runtime: nodejs12.x
+    handler: Backend_node/web_socket_handler.defaultHandler
     environment:
       CONNECTIONS_TABLE_NAME: { Ref: WebSocketConnectionsTable }
     events:
