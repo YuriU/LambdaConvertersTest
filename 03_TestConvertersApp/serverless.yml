@@ -74,7 +74,7 @@ functions:
       UPLOAD_RESULT_BUCKET_NAME: { Ref: UploadResultBucket }
       CONVERSION_JOBS_TABLE_NAME: { Ref: ConversionJobsTable }
     package:
-      artifact: Backend/Pipeline.FileUploaded/bin/Release/netcoreapp3.1/Pipeline.FileUploaded.zip
+      artifact: Backend_dotnet/Pipeline.FileUploaded/bin/Release/netcoreapp3.1/Pipeline.FileUploaded.zip
     events:
       - s3:
           bucket:  { Ref: UploadOriginalBucket }
@@ -88,7 +88,7 @@ functions:
       RESULT_NOTIFICATION_QUEUE: { Ref: ResultNotificationQueue }
       CONVERSION_NAME: "Copy"
     package:
-      artifact: Backend/Pipeline.CopyOriginalFile/bin/Release/netcoreapp3.1/Pipeline.CopyOriginalFile.zip
+      artifact: Backend_dotnet/Pipeline.CopyOriginalFile/bin/Release/netcoreapp3.1/Pipeline.CopyOriginalFile.zip
     events:
      - sqs:
          arn: !GetAtt CopyOriginalFileQueue.Arn
@@ -101,7 +101,7 @@ functions:
       RESULT_BUCKET_NAME: { Ref: ResultBucket }
       UPLOAD_RESULT_BUCKET_NAME: { Ref: UploadResultBucket }
     package:
-      artifact: Backend/Pipeline.ProcessResult/bin/Release/netcoreapp3.1/Pipeline.ProcessResult.zip
+      artifact: Backend_dotnet/Pipeline.ProcessResult/bin/Release/netcoreapp3.1/Pipeline.ProcessResult.zip
     events:
      - sqs:
          arn: !GetAtt ResultNotificationQueue.Arn
@@ -110,7 +110,7 @@ functions:
     handler: Pipeline.GetJobsList::Pipeline.GetJobsList.GetJobsListHandler::GetJobsList
     timeout: 15
     package:
-      artifact: Backend/Pipeline.GetJobsList/bin/Release/netcoreapp3.1/Pipeline.GetJobsList.zip
+      artifact: Backend_dotnet/Pipeline.GetJobsList/bin/Release/netcoreapp3.1/Pipeline.GetJobsList.zip
     environment:
       CONVERSION_JOBS_TABLE_NAME: { Ref: ConversionJobsTable }
     events:
@@ -127,7 +127,7 @@ functions:
     handler: Pipeline.GetDownloadUrl::Pipeline.GetDownloadUrl.GetDownloadUrlHandler::GetDownloadUrl
     timeout: 15
     package:
-      artifact: Backend/Pipeline.GetDownloadUrl/bin/Release/netcoreapp3.1/Pipeline.GetDownloadUrl.zip
+      artifact: Backend_dotnet/Pipeline.GetDownloadUrl/bin/Release/netcoreapp3.1/Pipeline.GetDownloadUrl.zip
     environment:
       RESULT_BUCKET_NAME: { Ref: ResultBucket }
       CONVERSION_JOBS_TABLE_NAME: { Ref: ConversionJobsTable }
@@ -145,7 +145,7 @@ functions:
     handler: Pipeline.GetUploadUrl::Pipeline.GetUploadUrl.GetUploadUrlHandler::GetUploadUrl
     timeout: 15
     package:
-      artifact: Backend/Pipeline.GetUploadUrl/bin/Release/netcoreapp3.1/Pipeline.GetUploadUrl.zip
+      artifact: Backend_dotnet/Pipeline.GetUploadUrl/bin/Release/netcoreapp3.1/Pipeline.GetUploadUrl.zip
     environment:
       UPLOAD_ORIGINAL_BUCKET_NAME: { Ref: UploadOriginalBucket }
     events:
@@ -162,7 +162,7 @@ functions:
     handler: Pipeline.DeleteJob::Pipeline.DeleteJob.DeleteJobHandler::DeleteJob
     timeout: 15
     package:
-      artifact: Backend/Pipeline.DeleteJob/bin/Release/netcoreapp3.1/Pipeline.DeleteJob.zip
+      artifact: Backend_dotnet/Pipeline.DeleteJob/bin/Release/netcoreapp3.1/Pipeline.DeleteJob.zip
     environment:
       UPLOAD_ORIGINAL_BUCKET_NAME: { Ref: UploadOriginalBucket }
       CONVERSION_JOBS_TABLE_NAME: { Ref: ConversionJobsTable }
@@ -182,7 +182,7 @@ functions:
     handler: Pipeline.WebSockets::Pipeline.WebSockets.WebSocketHandler::Connected
     timeout: 15
     package:
-      artifact: Backend/Pipeline.WebSockets/bin/Release/netcoreapp3.1/Pipeline.WebSockets.zip
+      artifact: Backend_dotnet/Pipeline.WebSockets/bin/Release/netcoreapp3.1/Pipeline.WebSockets.zip
     environment:
       CONNECTIONS_TABLE_NAME: { Ref: WebSocketConnectionsTable }
     events:
@@ -193,7 +193,7 @@ functions:
     handler: Pipeline.WebSockets::Pipeline.WebSockets.WebSocketHandler::Disconnected
     timeout: 15
     package:
-      artifact: Backend/Pipeline.WebSockets/bin/Release/netcoreapp3.1/Pipeline.WebSockets.zip
+      artifact: Backend_dotnet/Pipeline.WebSockets/bin/Release/netcoreapp3.1/Pipeline.WebSockets.zip
     environment:
       CONNECTIONS_TABLE_NAME: { Ref: WebSocketConnectionsTable }
     events:
@@ -204,7 +204,7 @@ functions:
     handler: Pipeline.WebSockets::Pipeline.WebSockets.WebSocketHandler::Default
     timeout: 15
     package:
-      artifact: Backend/Pipeline.WebSockets/bin/Release/netcoreapp3.1/Pipeline.WebSockets.zip
+      artifact: Backend_dotnet/Pipeline.WebSockets/bin/Release/netcoreapp3.1/Pipeline.WebSockets.zip
     environment:
       CONNECTIONS_TABLE_NAME: { Ref: WebSocketConnectionsTable }
     events:
@@ -215,7 +215,7 @@ functions:
     handler: Pipeline.ProcessJobTableStream::Pipeline.ProcessJobTableStream.DBStreamHandler::ProcessEvent
     timeout: 15
     package:
-      artifact: Backend/Pipeline.ProcessJobTableStream/bin/Release/netcoreapp3.1/Pipeline.ProcessJobTableStream.zip
+      artifact: Backend_dotnet/Pipeline.ProcessJobTableStream/bin/Release/netcoreapp3.1/Pipeline.ProcessJobTableStream.zip
     environment:
       CONNECTIONS_TABLE_NAME: { Ref: WebSocketConnectionsTable }
       WS_GATEWAY_ENDPOINT: { "Fn::Join" :["", ["https://", { Ref: WebsocketsApi }, ".execute-api.${self:provider.region}.amazonaws.com/${self:custom.stage}"]]}

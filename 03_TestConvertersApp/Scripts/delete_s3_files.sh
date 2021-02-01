@@ -9,8 +9,6 @@ echo "Or press enter to continue"
 
 read
 
-rmdir /tmp/empty
-mkdir /tmp/empty
 echo "Deleting original upload files from ${STAGE}..."
 
 
@@ -21,7 +19,7 @@ BUCKET_NAME=$(aws \
     --output text)
 
 
-aws s3 sync --delete /tmp/empty/ "s3://${BUCKET_NAME}/"
+aws s3 sync --delete ./Scripts/empty_folder "s3://${BUCKET_NAME}/"
 
 echo "Deleting result upload files from ${STAGE}..."
 
@@ -31,17 +29,16 @@ BUCKET_NAME=$(aws \
     --query "Stacks[0].Outputs[?OutputKey=='UploadResultBucket'] | [0].OutputValue" \
     --output text)
 
-aws s3 sync --delete /tmp/empty/ "s3://${BUCKET_NAME}/"
+aws s3 sync --delete ./Scripts/empty_folder "s3://${BUCKET_NAME}/"
 
 echo "Deleting result files from ${STAGE}..."
 
 BUCKET_NAME=$(aws \
     cloudformation describe-stacks \
     --stack-name "testconvertersapp-${STAGE}" \
-    --query "Stacks[0].Outputs[?OutputKey=='UploadResultBucket'] | [0].OutputValue" \
+    --query "Stacks[0].Outputs[?OutputKey=='ResultBucket'] | [0].OutputValue" \
     --output text)
 
-aws s3 sync --delete /tmp/empty/ "s3://${BUCKET_NAME}/"
+aws s3 sync --delete ./Scripts/empty_folder "s3://${BUCKET_NAME}/"
 
-rmdir /tmp/empty
 echo "Bucket ${BUCKET_NAME} has been emptied"
