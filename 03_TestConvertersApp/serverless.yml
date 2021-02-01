@@ -63,6 +63,14 @@ custom:
   
 package:
   individually: true
+  exclude:
+    - Frontend/**
+    - Scripts/**
+    - resources/**
+    - Backend_dotnet/**
+    - package.json
+    - package-lock.json
+    - node_modules/**
 
 functions:
   FileUploaded:
@@ -107,10 +115,9 @@ functions:
          arn: !GetAtt ResultNotificationQueue.Arn
 
   GetJobsList:
-    handler: Pipeline.GetJobsList::Pipeline.GetJobsList.GetJobsListHandler::GetJobsList
+    runtime: nodejs12.x
+    handler: Backend_node/api_handler.getJobs
     timeout: 15
-    package:
-      artifact: Backend_dotnet/Pipeline.GetJobsList/bin/Release/netcoreapp3.1/Pipeline.GetJobsList.zip
     environment:
       CONVERSION_JOBS_TABLE_NAME: { Ref: ConversionJobsTable }
     events:
