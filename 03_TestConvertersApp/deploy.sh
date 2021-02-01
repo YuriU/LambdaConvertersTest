@@ -9,4 +9,5 @@ while getopts ":s:" opt; do
   esac
 done
 
+sls deploy $@
 ./scripts/build_frontend_config.sh ./frontend/src/config.js $STAGE

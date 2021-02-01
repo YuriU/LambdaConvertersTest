@@ -349,6 +349,13 @@ resources:
         Type: COGNITO_USER_POOLS
         ProviderARNs: 
           - !GetAtt 'UserPool.Arn'
+          
+    WebSite:
+        Type: "AWS::S3::Bucket"
+        Properties:
+          WebsiteConfiguration:
+            ErrorDocument: index.html
+            IndexDocument: index.html
 
     # Copy original file queue
     CopyOriginalFileQueue:

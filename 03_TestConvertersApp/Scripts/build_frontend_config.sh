@@ -46,6 +46,7 @@ echo "const Config = {
     BackendHttpEndpoint: \"${HTTP_ENDPOINT}\",
     BackendWebSocketEndpoint: \"${WS_ENDPOINT}\",
     UserPoolId: \"${USER_POOL_ID}\",
-    UserPoolClientId: \"${USER_POOL_CLIENT_ID}\"
+    UserPoolClientId: \"${USER_POOL_CLIENT_ID}\",
+    Converters: [ \"Copy\" ]
 }
 export default Config;" > ${DESTINATION}
