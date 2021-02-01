@@ -37,10 +37,9 @@ class JobsList extends Component {
         </div>);
     }
 
-    deleteJob(jobId) {
-        const jobs = this.state.jobs.filter((job) => {
-            job.JobId != jobId
-        })
+    deleteJob(jobId) 
+    {
+        const jobs = this.state.jobs.filter((job) => job.JobId !== jobId);
 
         this.setState({
             jobs
