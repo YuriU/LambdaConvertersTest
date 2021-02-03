@@ -149,10 +149,12 @@ functions:
             authorizerId: { Ref: MyApiGatewayAuthorizer }
 
   GetUploadUrl:
-    handler: Pipeline.GetUploadUrl::Pipeline.GetUploadUrl.GetUploadUrlHandler::GetUploadUrl
-    timeout: 15
-    package:
-      artifact: Backend_dotnet/Pipeline.GetUploadUrl/bin/Release/netcoreapp3.1/Pipeline.GetUploadUrl.zip
+    #handler: Pipeline.GetUploadUrl::Pipeline.GetUploadUrl.GetUploadUrlHandler::GetUploadUrl
+    #timeout: 15
+    #package:
+    #  artifact: Backend_dotnet/Pipeline.GetUploadUrl/bin/Release/netcoreapp3.1/Pipeline.GetUploadUrl.zip
+    runtime: nodejs12.x
+    handler: Backend_node/api_handler.getUploadUrl
     environment:
       UPLOAD_ORIGINAL_BUCKET_NAME: { Ref: UploadOriginalBucket }
     events:
