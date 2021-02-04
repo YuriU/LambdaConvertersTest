@@ -149,12 +149,16 @@ functions:
             authorizerId: { Ref: MyApiGatewayAuthorizer }
 
   GetUploadUrl:
+    # .Net handler registration
     #handler: Pipeline.GetUploadUrl::Pipeline.GetUploadUrl.GetUploadUrlHandler::GetUploadUrl
     #timeout: 15
     #package:
     #  artifact: Backend_dotnet/Pipeline.GetUploadUrl/bin/Release/netcoreapp3.1/Pipeline.GetUploadUrl.zip
+
+    # NodeJsHandler registration
     runtime: nodejs12.x
     handler: Backend_node/api_handler.getUploadUrl
+
     environment:
       UPLOAD_ORIGINAL_BUCKET_NAME: { Ref: UploadOriginalBucket }
     events:
@@ -215,10 +219,16 @@ functions:
           route: $default
 
   JobsTableStream:
-    handler: Pipeline.ProcessJobTableStream::Pipeline.ProcessJobTableStream.DBStreamHandler::ProcessEvent
-    timeout: 15
-    package:
-      artifact: Backend_dotnet/Pipeline.ProcessJobTableStream/bin/Release/netcoreapp3.1/Pipeline.ProcessJobTableStream.zip
+    # .Net handler registration
+    #handler: Pipeline.ProcessJobTableStream::Pipeline.ProcessJobTableStream.DBStreamHandler::ProcessEvent
+    #timeout: 15
+    #package:
+    #  artifact: Backend_dotnet/Pipeline.ProcessJobTableStream/bin/Release/netcoreapp3.1/Pipeline.ProcessJobTableStream.zip
+
+    # NodeJsHandler registration
+    runtime: nodejs12.x
+    handler: Backend_node/web_socket_handler.jobsTableStreamHandler
+
     environment:
       CONNECTIONS_TABLE_NAME: { Ref: WebSocketConnectionsTable }
       WS_GATEWAY_ENDPOINT: { "Fn::Join" :["", ["https://", { Ref: WebsocketsApi }, ".execute-api.${self:provider.region}.amazonaws.com/${self:custom.stage}"]]}
