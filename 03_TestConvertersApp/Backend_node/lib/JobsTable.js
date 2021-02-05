@@ -83,6 +83,18 @@ class JobsTable {
             return null;
         }
     }
+
+    async deleteJob(jobId) {
+        const dynamoDb = new AWS.DynamoDB.DocumentClient({
+                params: {TableName: this.table_name}
+            })
+            
+        const dbResult = await dynamoDb.delete({
+            Key: { id: jobId }
+        }).promise();
+        
+        return dbResult;
+    }
     
     statusesToDictionary(conversionResults) {
         var dict = {}

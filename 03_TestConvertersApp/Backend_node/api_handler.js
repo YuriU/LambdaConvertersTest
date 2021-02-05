@@ -13,6 +13,15 @@ module.exports.getJobs = async (event, context) => {
     return generateResponse(200, jobs);
 };
 
+module.exports.deleteJob = async (event, context) => {
+  const jobId = event.queryStringParameters.id;
+  const jobsTable = new JobsTable(process.env.CONVERSION_JOBS_TABLE_NAME)
+
+  await jobsTable.deleteJob(jobId)
+  
+  return generateResponse(200, ({ }) );
+}
+
 module.exports.getUploadUrl = async (event, context) => {
     const fileName = event.queryStringParameters.filename;
     const uploadKey = uuidv4() + '/' + fileName;
