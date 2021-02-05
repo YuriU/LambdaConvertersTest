@@ -74,15 +74,21 @@ package:
 
 functions:
   FileUploaded:
-    handler: Pipeline.FileUploaded::Pipeline.FileUploaded.FileUploadedHandler::OriginalFileUploaded
-    timeout: 15
+    # .Net handler registration
+    #handler: Pipeline.FileUploaded::Pipeline.FileUploaded.FileUploadedHandler::OriginalFileUploaded
+    #timeout: 15
+    #package:
+    #  artifact: Backend_dotnet/Pipeline.FileUploaded/bin/Release/netcoreapp3.1/Pipeline.FileUploaded.zip
+
+    # NodeJs Handler registration
+    runtime: nodejs12.x
+    handler: Backend_node/pipeline_handler.fileUploaded
+
     environment:
       FILE_UPLOADED_TOPIC_ARN: { Ref: FileUploadedTopic }
       RESULT_BUCKET_NAME: { Ref: ResultBucket }
       UPLOAD_RESULT_BUCKET_NAME: { Ref: UploadResultBucket }
       CONVERSION_JOBS_TABLE_NAME: { Ref: ConversionJobsTable }
-    package:
-      artifact: Backend_dotnet/Pipeline.FileUploaded/bin/Release/netcoreapp3.1/Pipeline.FileUploaded.zip
     events:
       - s3:
           bucket:  { Ref: UploadOriginalBucket }
@@ -90,6 +96,7 @@ functions:
           existing: true
 
   CopyOriginalFile:
+    # .Net handler registration
     handler: Pipeline.CopyOriginalFile::Pipeline.CopyOriginalFile.ConvertFileHandler::Convert
     timeout: 15
     environment:
@@ -102,6 +109,7 @@ functions:
          arn: !GetAtt CopyOriginalFileQueue.Arn
 
   ProcessConversionResult:
+    # .Net handler registration
     handler: Pipeline.ProcessResult::Pipeline.ProcessResult.ProcessResultHandler::ProcessResult
     timeout: 15
     environment:
@@ -131,10 +139,16 @@ functions:
             authorizerId: { Ref: MyApiGatewayAuthorizer }
 
   GetDownloadUrl:
-    handler: Pipeline.GetDownloadUrl::Pipeline.GetDownloadUrl.GetDownloadUrlHandler::GetDownloadUrl
-    timeout: 15
-    package:
-      artifact: Backend_dotnet/Pipeline.GetDownloadUrl/bin/Release/netcoreapp3.1/Pipeline.GetDownloadUrl.zip
+    # .Net handler registration
+    #handler: Pipeline.GetDownloadUrl::Pipeline.GetDownloadUrl.GetDownloadUrlHandler::GetDownloadUrl
+    #timeout: 15
+    #package:
+    #  artifact: Backend_dotnet/Pipeline.GetDownloadUrl/bin/Release/netcoreapp3.1/Pipeline.GetDownloadUrl.zip
+
+    # NodeJsHandler registration
+    runtime: nodejs12.x
+    handler: Backend_node/api_handler.getDownloadUrl
+
     environment:
       RESULT_BUCKET_NAME: { Ref: ResultBucket }
       CONVERSION_JOBS_TABLE_NAME: { Ref: ConversionJobsTable }
