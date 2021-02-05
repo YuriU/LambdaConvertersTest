@@ -71,6 +71,9 @@ package:
     - package.json
     - package-lock.json
     - node_modules/**
+    - build_backend.sh
+    - create_user.sh
+    - build_backend.sh
 
 functions:
   FileUploaded:
