@@ -1,4 +1,4 @@
-﻿﻿namespace Pipeline.Contracts
+﻿namespace Pipeline.Contracts
 {
     public class FileUploadedEvent
     {
