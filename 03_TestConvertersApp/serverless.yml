@@ -113,14 +113,19 @@ functions:
 
   ProcessConversionResult:
     # .Net handler registration
-    handler: Pipeline.ProcessResult::Pipeline.ProcessResult.ProcessResultHandler::ProcessResult
-    timeout: 15
+    #handler: Pipeline.ProcessResult::Pipeline.ProcessResult.ProcessResultHandler::ProcessResult
+    #timeout: 15
+    #package:
+    #  artifact: Backend_dotnet/Pipeline.ProcessResult/bin/Release/netcoreapp3.1/Pipeline.ProcessResult.zip
+
+    # NodeJs Handler registration
+    runtime: nodejs12.x
+    handler: Backend_node/pipeline_handler.processResult
+
     environment:
       CONVERSION_JOBS_TABLE_NAME: { Ref: ConversionJobsTable }
       RESULT_BUCKET_NAME: { Ref: ResultBucket }
       UPLOAD_RESULT_BUCKET_NAME: { Ref: UploadResultBucket }
-    package:
-      artifact: Backend_dotnet/Pipeline.ProcessResult/bin/Release/netcoreapp3.1/Pipeline.ProcessResult.zip
     events:
      - sqs:
          arn: !GetAtt ResultNotificationQueue.Arn

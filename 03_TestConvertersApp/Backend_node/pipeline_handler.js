@@ -23,6 +23,39 @@ module.exports.fileUploaded = async (event, context) => {
     };
 };
 
+module.exports.processResult = async (event, context) => {
+
+    const jobsTable = new JobsTable(process.env.CONVERSION_JOBS_TABLE_NAME)
+    for(const record of event.Records) { 
+        
+        const result = JSON.parse(record.body)
+        var jobId = result.JobId;
+        const fileName = await jobsTable.getFileName(jobId)
+        const extension = result.ResultKey.split('.').pop(); 
+        const destinationKey = storageUtils.makeConvertedFilePath(jobId, fileName, result.Converter, '.' + extension)
+
+        if(result.Sucessful) 
+        {
+            var params = {
+                Bucket: process.env.RESULT_BUCKET_NAME, 
+                CopySource: `${process.env.UPLOAD_RESULT_BUCKET_NAME}/${result.ResultKey}`, 
+                Key: destinationKey
+               };
+        
+            await s3.copyObject(params).promise()
+            await s3.deleteObject({
+                Bucket: process.env.UPLOAD_RESULT_BUCKET_NAME,
+                Key: result.ResultKey
+            }).promise()
+        }
+
+        await jobsTable.setConversionResult(jobId, result.Converter, result.Sucessful, destinationKey)
+    }   
+
+    return {
+        statusCode: 200,
+      };
+};
 
 const processFileUploaded =  async (record) => {
     const originalFileKey = record.object.key;
@@ -40,6 +73,8 @@ const processFileUploaded =  async (record) => {
     await publishFileUploaded(process.env.FILE_UPLOADED_TOPIC_ARN, jobId, srcFilePath)
 }
 
+
+
 const moveToDestinationBucket = async (jobId, originalBucket, originalFileKey) => {
     const fileName = originalFileKey.split(/(\\|\/)/g).pop()
     const destinationKey = storageUtils.makeOriginalFilePath(jobId, fileName)
@@ -51,6 +86,19 @@ const moveToDestinationBucket = async (jobId, originalBucket, originalFileKey) =
        };
 
     await s3.copyObject(params).promise()
+    await s3.deleteObject({
+        Bucket: originalBucket,
+        Key: originalFileKey
+    }).promise()
+
+    return destinationKey;
+}
+
+const moveToResultBucket = async (jobId, originalBucket, originalFileKey) => {
+    const fileName = originalFileKey.split(/(\\|\/)/g).pop()
+    const destinationKey = storageUtils.makeOriginalFilePath(jobId, fileName)
+
+   
     await s3.deleteObject({
         Bucket: originalBucket,
         Key: originalFileKey
