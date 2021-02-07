@@ -313,6 +313,10 @@ resources:
       Value: { "Fn::Join" :["", ["https://", { Ref: ApiGatewayRestApi }, ".execute-api.${self:provider.region}.amazonaws.com/${self:custom.stage}"]]} 
     WebSocketEndpoint:
       Value: { "Fn::Join" :["", ["wss://", { Ref: WebsocketsApi }, ".execute-api.${self:provider.region}.amazonaws.com/${self:custom.stage}"]]}
+    WebSiteBucket:
+      Value: { Ref: WebSiteBucket }
+    WebSiteUrl:
+      Value: { "Fn::GetAtt": [WebSiteBucket, WebsiteURL] }
 
   Resources:
     UploadOriginalBucket:
@@ -415,12 +419,13 @@ resources:
         ProviderARNs: 
           - !GetAtt 'UserPool.Arn'
           
-    WebSite:
+    WebSiteBucket:
         Type: "AWS::S3::Bucket"
         Properties:
           WebsiteConfiguration:
             ErrorDocument: index.html
             IndexDocument: index.html
+            
 
     # Copy original file queue
     CopyOriginalFileQueue:
