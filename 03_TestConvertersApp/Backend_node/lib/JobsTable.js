@@ -84,6 +84,20 @@ class JobsTable {
         }
     }
 
+
+    async getFileName(jobId) {
+        const dynamoDb = new AWS.DynamoDB.DocumentClient({
+            params: {TableName: this.table_name}
+        })
+
+        const job = await dynamoDb.get({
+            Key: { id: jobId },
+            AttributesToGet: ['id', 'fileName']
+        }).promise()
+
+        return job.Item.fileName
+    }
+
     async deleteJob(jobId) {
         const dynamoDb = new AWS.DynamoDB.DocumentClient({
                 params: {TableName: this.table_name}
