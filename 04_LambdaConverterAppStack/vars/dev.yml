@@ -1,0 +1,6 @@
+Name: One
+FileUploadedTopic: <TopicArn>
+Image: <Image>
+ResultNotificationQueue: <ResultNotificationQueue>
+OriginalBucketName: <OriginalBucketName>
+ResultBucketName: <ResultBucketName>
