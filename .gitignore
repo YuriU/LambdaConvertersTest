@@ -247,3 +247,4 @@ _Pvt_Extensions
 /03_TestConvertersApp/Frontend/dist
 /03_TestConvertersApp/Frontend/src/config.js
 package-lock.json
+/04_LambdaConverterAppStack/connection_params.yml
