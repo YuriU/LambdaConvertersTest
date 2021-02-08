@@ -15,17 +15,17 @@ provider:
       Action:
         - sqs:SendMessage
       Resource:
-        - { "Fn::Join" : [ ":", [ "arn:aws:sqs", "${self:provider.region}", "#{AWS::AccountId}" ,"${self:custom.extra.ResultNotificationQueue}"] ]}
+        - ${self:custom.connectionParams.ResultNotificationQueueArn}
     - Effect: Allow
       Action:
         - s3:GetObject
       Resource:
-        - { "Fn::Join" : [ "", [ "arn:aws:s3:::", "${self:custom.extra.OriginalBucketName}", "/*"] ]}
+        - { "Fn::Join" : [ "", [ "arn:aws:s3:::", "${self:custom.connectionParams.OriginalBucketName}", "/*"] ]}
     - Effect: Allow
       Action:
         - s3:PutObject
       Resource:
-        - { "Fn::Join" : [ "", [ "arn:aws:s3:::", "${self:custom.extra.ResultBucketName}", "/*"] ]}
+        - { "Fn::Join" : [ "", [ "arn:aws:s3:::", "${self:custom.connectionParams.ResultBucketName}", "/*"] ]}
 
 functions:
   Converter:
@@ -33,8 +33,8 @@ functions:
     timeout: 60
     environment:
       CONVERTER_NAME: ${self:custom.extra.Name}
-      RESULT_NOTIFICATION_QUEUE: { "Fn::Join" : [ "", [ "https://sqs.", "${self:provider.region}" ,".amazonaws.com/", "#{AWS::AccountId}" , "/" ,"${self:custom.extra.ResultNotificationQueue}"] ]}
-      RESULT_BUCKET_NAME: ${self:custom.extra.ResultBucketName}
+      RESULT_NOTIFICATION_QUEUE: ${self:custom.connectionParams.ResultNotificationQueueEndpoint}
+      RESULT_BUCKET_NAME: ${self:custom.connectionParams.ResultBucketName}
     events:
      - sqs:
          arn: !GetAtt ConvertFileQueue.Arn
@@ -42,6 +42,7 @@ functions:
 custom:
   stage: ${opt:stage, self:provider.stage}
   extra: ${file(vars/${self:custom.stage}.yml)}
+  connectionParams: ${file(connection_params.yml)}
 
 resources:
   Resources:
@@ -64,7 +65,7 @@ resources:
             Resource: !GetAtt ConvertFileQueue.Arn
             Condition:
               ArnEquals:
-                aws:SourceArn: ${self:custom.extra.FileUploadedTopic}
+                aws:SourceArn: ${self:custom.connectionParams.FileUploadedTopic}
         Queues:
           - !Ref ConvertFileQueue
 
@@ -74,5 +75,5 @@ resources:
         Protocol: sqs
         Endpoint: !GetAtt ConvertFileQueue.Arn
         Region: "${self:provider.region}"
-        TopicArn: ${self:custom.extra.FileUploadedTopic}
+        TopicArn: ${self:custom.connectionParams.FileUploadedTopic}
         RawMessageDelivery: 'true'
