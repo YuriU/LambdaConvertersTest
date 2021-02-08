@@ -317,6 +317,10 @@ resources:
       Value: { Ref: WebSiteBucket }
     WebSiteUrl:
       Value: { "Fn::GetAtt": [WebSiteBucket, WebsiteURL] }
+    FileUploadedTopic:
+      Value: { Ref: FileUploadedTopic }
+    ResultNotificationQueue:
+      Value: { Ref: ResultNotificationQueue }
 
   Resources:
     UploadOriginalBucket:

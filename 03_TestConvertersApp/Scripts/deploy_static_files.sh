@@ -20,7 +20,7 @@ WEBSITE_URL=$(aws \
     --query "Stacks[0].Outputs[?OutputKey=='WebSiteUrl'] | [0].OutputValue" \
     --output text)
 
-(cd ./frontend; npm run build)
+(cd ./frontend; npm i; npm run build)
 
 aws s3 sync --acl 'public-read' --delete ./frontend/dist "s3://${BUCKET_NAME}/"
 
