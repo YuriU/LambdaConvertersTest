@@ -319,8 +319,10 @@ resources:
       Value: { "Fn::GetAtt": [WebSiteBucket, WebsiteURL] }
     FileUploadedTopic:
       Value: { Ref: FileUploadedTopic }
-    ResultNotificationQueue:
+    ResultNotificationQueueEndpoint:
       Value: { Ref: ResultNotificationQueue }
+    ResultNotificationQueueArn:
+      Value: { "Fn::GetAtt": [ResultNotificationQueue, Arn] }
 
   Resources:
     UploadOriginalBucket:
