@@ -46,9 +46,14 @@ class JobItem extends Component {
                 <button className="btn-download" onClick={(evt) => this.deleteJob()}><i class="fas fa-trash fa-fw"></i></button>
             </td>
             <td>
-                { this.converters.map((converter, index) => {
-                   return(<button className={"btn-download " + this.computeStyle(converter)} key={converter}>{converter}</button>)
-                })}
+                {
+                    Object.entries(this.props.job.ConversionStatuses)
+                    .map((v) => v[0])
+                    .sort()
+                    .map((converter) => {
+                        return(<button className={"btn-download " + this.computeStyle(converter)} key={converter}>{converter}</button>)
+                    })
+                 }
             </td>
         </tr>);
     }
