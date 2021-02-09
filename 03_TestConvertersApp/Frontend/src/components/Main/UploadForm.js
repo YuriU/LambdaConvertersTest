@@ -5,7 +5,8 @@ class UploadForm extends Component {
     constructor(props) {
         super(props);
           this.state = {
-            selectedFile: null
+            selectedFile: null,
+            uploading: false
           }
        
         
@@ -19,7 +20,23 @@ class UploadForm extends Component {
                         <input type="file" name="file" onChange={this.onChangeHandler}/>
                     </div>
                     <div>
-                        <button type="button" className="btn btn-upload" onClick={this.onClickHandler}>Upload</button> 
+                        <button type="button" className="btn btn-upload btn-primary" onClick={this.onClickHandler}>
+                           { !this.state.uploading && (
+                               <div class="bnt-enabled-state">
+                                <span>Upload</span>
+                               </div>
+                             )
+                           }
+
+                           {
+                             this.state.uploading && (
+                                <div class="bnt-disabled-state">
+                                    <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span><span>Uploading</span>
+                                </div>
+                             )
+                           }
+                            
+                        </button> 
                     </div>
                </div>)
     }
@@ -27,10 +44,13 @@ class UploadForm extends Component {
     async onClickHandler(){
         try {
             if(this.state.selectedFile) {
+                this.setState({ uploading: true })
                 await this.props.httpClient.uploadFile(this.state.selectedFile);
+                this.setState({ uploading: false })
             }
         }
         catch {
+            this.setState({ uploading: false })
         }
         
     }

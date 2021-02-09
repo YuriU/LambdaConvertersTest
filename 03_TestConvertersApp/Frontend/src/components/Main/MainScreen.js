@@ -82,7 +82,7 @@ class MainScreen extends Component {
 
     render() {
         return (<div className="mainscreen">
-          <nav className="navbar">
+          <nav className="navbar navbar-dark bg-dark">
             <ul>
               <li>
                 <Link to="/">Home</Link>
