@@ -41,13 +41,16 @@ class HttpClient {
                 else {
                     var zip = new JSZip();
                     var count = 0;
+                    console.log(members)
                     members.forEach((p) => {
                         self.blobToBase64(p.blob, function (binaryData) {
+
+                            zip.file(p.fileName, binaryData, {base64: true});
+
                             if(count < members.length - 1) {
-                                zip.file(p.fileName, binaryData, {base64: true});
                                 count++;
                             }
-                            else{
+                            else {
                                 zip.generateAsync({type:"blob"})
                                 .then(function(content) {
                                     self.downloadBlob(content, 'file.zip');

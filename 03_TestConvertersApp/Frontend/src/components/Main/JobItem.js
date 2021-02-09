@@ -41,7 +41,7 @@ class JobItem extends Component {
     render() {
         return(<tr className="jobItem">
             <td>{this.props.job.FileName}</td>
-            <td>{this.props.job.Started}</td>
+            <td>{new Date(+this.props.job.Started).toUTCString()}</td>
             <td><button className="btn-download" onClick={(evt) => this.downloadResult()}><i class="fas fa-download fa-fw"></i></button>
                 <button className="btn-download" onClick={(evt) => this.deleteJob()}><i class="fas fa-trash fa-fw"></i></button>
             </td>

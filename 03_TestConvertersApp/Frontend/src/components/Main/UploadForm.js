@@ -22,7 +22,7 @@ class UploadForm extends Component {
                     <div>
                         <button type="button" className="btn btn-upload btn-primary" onClick={this.onClickHandler}>
                            { !this.state.uploading && (
-                               <div class="bnt-enabled-state">
+                               <div className="bnt-enabled-state">
                                 <span>Upload</span>
                                </div>
                              )
@@ -30,8 +30,8 @@ class UploadForm extends Component {
 
                            {
                              this.state.uploading && (
-                                <div class="bnt-disabled-state">
-                                    <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span><span>Uploading</span>
+                                <div className="bnt-disabled-state">
+                                    <span className="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span><span>Uploading</span>
                                 </div>
                              )
                            }
