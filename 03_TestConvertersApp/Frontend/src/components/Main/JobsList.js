@@ -30,11 +30,22 @@ class JobsList extends Component {
     }
 
     render() {
-        return(<div>
-            {this.state.jobs.map((item, index) => {
-                return (<JobItem job={item} key={item.JobId} onDeleted={this.deleteJob} httpClient={this.props.httpClient} />)
-            })}
-        </div>);
+        return(
+            <table className="table">
+                <thead>
+                    <tr>
+                    <th scope="col">FileName</th>
+                    <th scope="col">Started</th>
+                    <th scope="col">Actions</th>
+                    <th scope="col">Converters</th>
+                    </tr>
+                </thead>
+                <tbody>
+                     {this.state.jobs.map((item, index) => {
+                            return (<JobItem job={item} key={item.JobId} onDeleted={this.deleteJob} httpClient={this.props.httpClient} />)
+                })}
+                </tbody>
+            </table>);
     }
 
     deleteJob(jobId) 

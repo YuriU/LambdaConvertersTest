@@ -39,18 +39,18 @@ class JobItem extends Component {
     }
 
     render() {
-        return(<div className="jobItem">
-            <div className="jobItem-header">
-                <strong>FileName:</strong><p>
-                    <a href="load">{this.props.job.FileName}</a>
-                </p>
+        return(<tr className="jobItem">
+            <td>{this.props.job.FileName}</td>
+            <td>{this.props.job.Started}</td>
+            <td><button className="btn-download" onClick={(evt) => this.downloadResult()}><i class="fas fa-download fa-fw"></i></button>
+                <button className="btn-download" onClick={(evt) => this.deleteJob()}><i class="fas fa-trash fa-fw"></i></button>
+            </td>
+            <td>
                 { this.converters.map((converter, index) => {
                    return(<button className={"btn-download " + this.computeStyle(converter)} key={converter}>{converter}</button>)
                 })}
-                <button className="btn-download success" onClick={(evt) => this.downloadResult()}>Download</button>
-                <button className="btn-download success" onClick={(evt) => this.deleteJob()}>Delete</button>
-            </div>
-        </div>);
+            </td>
+        </tr>);
     }
 }
 
