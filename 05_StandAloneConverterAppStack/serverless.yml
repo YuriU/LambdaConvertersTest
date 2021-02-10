@@ -1,9 +1,6 @@
 service: testconverterlocal
 frameworkVersion: '2'
 
-plugins:
-  - serverless-pseudo-parameters
-
 provider:
   name: aws
   region: eu-central-1
@@ -15,21 +12,22 @@ provider:
       Action:
         - sqs:SendMessage
       Resource:
-        - { "Fn::Join" : [ ":", [ "arn:aws:sqs", "${self:provider.region}", "#{AWS::AccountId}" ,"${self:custom.extra.ResultNotificationQueue}"] ]}
+        - ${self:custom.connectionParams.ResultNotificationQueueArn}
     - Effect: Allow
       Action:
         - s3:GetObject
       Resource:
-        - { "Fn::Join" : [ "", [ "arn:aws:s3:::", "${self:custom.extra.OriginalBucketName}", "/*"] ]}
+        - { "Fn::Join" : [ "", [ "arn:aws:s3:::", "${self:custom.connectionParams.OriginalBucketName}", "/*"] ]}
     - Effect: Allow
       Action:
         - s3:PutObject
       Resource:
-        - { "Fn::Join" : [ "", [ "arn:aws:s3:::", "${self:custom.extra.ResultBucketName}", "/*"] ]}
+        - { "Fn::Join" : [ "", [ "arn:aws:s3:::", "${self:custom.connectionParams.ResultBucketName}", "/*"] ]}
 
 custom:
   stage: ${opt:stage, self:provider.stage}
   extra: ${file(vars/${self:custom.stage}.yml)}
+  connectionParams: ${file(connection_params.yml)}
 
 resources:
   Resources:
@@ -52,7 +50,7 @@ resources:
             Resource: !GetAtt ConvertFileQueue.Arn
             Condition:
               ArnEquals:
-                aws:SourceArn: ${self:custom.extra.FileUploadedTopic}
+                aws:SourceArn: ${self:custom.connectionParams.FileUploadedTopic}
         Queues:
           - !Ref ConvertFileQueue
 
@@ -62,5 +60,5 @@ resources:
         Protocol: sqs
         Endpoint: !GetAtt ConvertFileQueue.Arn
         Region: "${self:provider.region}"
-        TopicArn: ${self:custom.extra.FileUploadedTopic}
+        TopicArn: ${self:custom.connectionParams.FileUploadedTopic}
         RawMessageDelivery: 'true'
