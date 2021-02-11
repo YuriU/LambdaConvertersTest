@@ -29,27 +29,39 @@ module.exports.processResult = async (event, context) => {
     for(const record of event.Records) { 
         
         const result = JSON.parse(record.body)
+        console.log(record.body)
         var jobId = result.JobId;
         const fileName = await jobsTable.getFileName(jobId)
-        const extension = result.ResultKey.split('.').pop(); 
-        const destinationKey = storageUtils.makeConvertedFilePath(jobId, fileName, result.Converter, '.' + extension)
+        console.log('File name ' + fileName)
 
         if(result.Sucessful) 
         {
+            const extension = result.ResultKey.split('.').pop(); 
+            const destinationKey = storageUtils.makeConvertedFilePath(jobId, fileName, result.Converter, '.' + extension)
+
             var params = {
                 Bucket: process.env.RESULT_BUCKET_NAME, 
                 CopySource: `${process.env.UPLOAD_RESULT_BUCKET_NAME}/${result.ResultKey}`, 
                 Key: destinationKey
                };
-        
-            await s3.copyObject(params).promise()
-            await s3.deleteObject({
-                Bucket: process.env.UPLOAD_RESULT_BUCKET_NAME,
-                Key: result.ResultKey
-            }).promise()
-        }
 
-        await jobsTable.setConversionResult(jobId, result.Converter, result.Sucessful, destinationKey)
+            try 
+            {
+                await s3.copyObject(params).promise()
+                await s3.deleteObject({
+                    Bucket: process.env.UPLOAD_RESULT_BUCKET_NAME,
+                    Key: result.ResultKey
+                }).promise()
+                await jobsTable.setConversionResult(jobId, result.Converter, result.Sucessful, destinationKey, null)
+            }
+            catch(error) {
+                await jobsTable.setConversionResult(jobId, result.Converter, false, "", JSON.stringify(error))
+            }
+        }
+        else 
+        {
+            await jobsTable.setConversionResult(jobId, result.Converter, result.Sucessful, "", null)
+        }
     }   
 
     return {

@@ -110,7 +110,7 @@ class JobsTable {
         return dbResult;
     }
 
-    async setConversionResult(jobId, converter, success, convertedKey) {
+    async setConversionResult(jobId, converter, success, convertedKey, error) {
 
         const dynamoDb = new AWS.DynamoDB.DocumentClient({
             params: {TableName: this.table_name}
@@ -119,7 +119,7 @@ class JobsTable {
         await dynamoDb.update({
             Key: { id: jobId },
             UpdateExpression: 'SET #converters.#converter = :result',
-            ConditionExpression : "attribute_not_exists(#converters.#converter)",
+            //ConditionExpression : "attribute_not_exists(#converters.#converter)",
             ExpressionAttributeNames: { 
                 '#converters' : 'conversionResults',
                 '#converter' : converter 
