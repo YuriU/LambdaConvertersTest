@@ -4,7 +4,7 @@ frameworkVersion: '2'
 provider:
   name: aws
   region: eu-central-1
-  memorySize: 512
+  memorySize: 1024
   lambdaHashingVersion: 20201221
 
   iamRoleStatements:
@@ -27,7 +27,7 @@ provider:
 functions:
   Converter:
     image: ${self:custom.extra.Image}
-    timeout: 60
+    timeout: 600
     environment:
       CONVERTER_NAME: ${self:custom.extra.Name}
       RESULT_NOTIFICATION_QUEUE: ${self:custom.connectionParams.ResultNotificationQueueEndpoint}
@@ -46,7 +46,7 @@ resources:
     ConvertFileQueue:
       Type: "AWS::SQS::Queue"
       Properties:
-        VisibilityTimeout: 90
+        VisibilityTimeout: 1200
 
     ConvertFileQueuePolicy:
       Type: "AWS::SQS::QueuePolicy"
