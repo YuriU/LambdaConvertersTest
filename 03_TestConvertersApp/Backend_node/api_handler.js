@@ -42,16 +42,19 @@ module.exports.getDownloadUrl = async (event, context) => {
     return url;
   }
 
+
   const result = [];
   if(converter) {
-    if(job.ConversionStatuses[converter]) {
+    if(job.ConversionStatuses[converter] && job.ConversionStatuses[converter].Successful) {
         const key = job.ConversionStatuses[converter].Key
         result.push(getDownloadPresigned(key))
     }
   }
   else {
     for (const [key, value] of Object.entries(job.ConversionStatuses)) {
-      result.push(getDownloadPresigned(value.Key))
+      if(value.Successful) {
+          result.push(getDownloadPresigned(value.Key))
+      }
     }
   }
 
