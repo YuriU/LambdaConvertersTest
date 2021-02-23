@@ -22,11 +22,12 @@ namespace Pipeline.Data
 
         public async Task AddJob(string jobId, string fileName, DateTime started)
         {
+            var jsDateTime = (started.Ticks - new DateTime(1970, 1, 1).Ticks) / 10000;
             await _dynamoDbClient.PutItemAsync(_tableName, new Dictionary<string, AttributeValue>()
             {
                 { "id" , new AttributeValue  { S = jobId } },
                 { "fileName" , new AttributeValue { S = fileName } },
-                { "started" , new AttributeValue { N = DateTime.UtcNow.Ticks.ToString() }}, 
+                { "started" , new AttributeValue { N = jsDateTime.ToString() }}, 
                 { "conversionResults", new AttributeValue() { M = new AutoConstructedDictionary<string, AttributeValue> { }, IsMSet = true }}
             });
         }
