@@ -31,36 +31,55 @@ module.exports.processResult = async (event, context) => {
         const result = JSON.parse(record.body)
         console.log(record.body)
         var jobId = result.JobId;
-        const fileName = await jobsTable.getFileName(jobId)
+        const job = await jobsTable.getJob(jobId)
+        if(!job){
+            continue;
+        }
+
+        const fileName = job.FileName;
         console.log('File name ' + fileName)
 
         if(result.Sucessful) 
         {
-            const extension = result.ResultKey.split('.').pop(); 
-            const destinationKey = storageUtils.makeConvertedFilePath(jobId, fileName, result.Converter, '.' + extension)
-
-            var params = {
-                Bucket: process.env.RESULT_BUCKET_NAME, 
-                CopySource: `${process.env.UPLOAD_RESULT_BUCKET_NAME}/${result.ResultKey}`, 
-                Key: destinationKey
-               };
-
             try 
             {
-                await s3.copyObject(params).promise()
-                await s3.deleteObject({
-                    Bucket: process.env.UPLOAD_RESULT_BUCKET_NAME,
-                    Key: result.ResultKey
-                }).promise()
-                await jobsTable.setConversionResult(jobId, result.Converter, result.Sucessful, destinationKey, null)
+
+                const extension = result.ResultKey.split('.').pop(); 
+                const destinationKey = storageUtils.makeConvertedFilePath(jobId, fileName, result.Converter, '.' + extension)
+
+                // Move main file
+                await moveFile(
+                      process.env.UPLOAD_RESULT_BUCKET_NAME,
+                      result.ResultKey,
+                      process.env.RESULT_BUCKET_NAME,
+                      destinationKey
+                     );
+                
+                const additionalFiles = {};
+                if(result.AdditionalFiles) {
+                    for (const [key, value] of Object.entries(result.AdditionalFiles)){
+                        const additionalFileKey = storageUtils.makeConvertedAdditionalFilePath(jobId, fileName, result.Converter, key);
+
+                        await moveFile(
+                            process.env.UPLOAD_RESULT_BUCKET_NAME,
+                            value,
+                            process.env.RESULT_BUCKET_NAME,
+                            additionalFileKey
+                           );
+
+                        additionalFiles[key] = additionalFileKey;
+                    }
+                }
+
+                await jobsTable.setConversionResult(jobId, result.Converter, result.Sucessful, destinationKey, additionalFiles, null)
             }
             catch(error) {
-                await jobsTable.setConversionResult(jobId, result.Converter, false, "", JSON.stringify(error))
+                await jobsTable.setConversionResult(jobId, result.Converter, false, "", {}, JSON.stringify(error))
             }
         }
         else 
         {
-            await jobsTable.setConversionResult(jobId, result.Converter, result.Sucessful, "", null)
+            await jobsTable.setConversionResult(jobId, result.Converter, result.Sucessful, "", {}, null)
         }
     }   
 
@@ -68,6 +87,20 @@ module.exports.processResult = async (event, context) => {
         statusCode: 200,
       };
 };
+
+const moveFile = async (srcBucket, srcKey, resultBucket, resultKey) => {
+    var params = {
+        Bucket: resultBucket, 
+        CopySource: `${srcBucket}/${srcKey}`, 
+        Key: resultKey
+       };
+
+    await s3.copyObject(params).promise()
+    await s3.deleteObject({
+        Bucket: srcBucket,
+        Key: srcKey
+    }).promise()
+}
 
 const processFileUploaded =  async (record) => {
     const originalFileKey = record.object.key;

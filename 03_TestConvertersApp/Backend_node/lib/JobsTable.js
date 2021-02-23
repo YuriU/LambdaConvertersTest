@@ -95,7 +95,11 @@ class JobsTable {
             AttributesToGet: ['id', 'fileName']
         }).promise()
 
-        return job.Item.fileName
+        if(job && job.Item){
+            return job.Item.fileName
+        }
+        
+        return null;
     }
 
     async deleteJob(jobId) {
@@ -110,7 +114,7 @@ class JobsTable {
         return dbResult;
     }
 
-    async setConversionResult(jobId, converter, success, convertedKey, error) {
+    async setConversionResult(jobId, converter, success, convertedKey, additionalFiles, error) {
 
         const dynamoDb = new AWS.DynamoDB.DocumentClient({
             params: {TableName: this.table_name}
@@ -126,7 +130,8 @@ class JobsTable {
             },
             ExpressionAttributeValues: { ':result' : {
                 sucessful : success,
-                key: convertedKey
+                key: convertedKey,
+                additionalFiles: additionalFiles
             }}
         }).promise();
     }

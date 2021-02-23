@@ -7,7 +7,12 @@ function makeConvertedFilePath(jobId, key, converter, convertedExtension) {
     return `${jobId}/${key}/${converter}${convertedExtension}`
 }
 
+function makeConvertedAdditionalFilePath(jobId, key, converter, fileName) {
+    return `${jobId}/${key}/${converter}_Additional/${fileName}`
+}
+
 module.exports = {
     makeOriginalFilePath: makeOriginalFilePath,
-    makeConvertedFilePath: makeConvertedFilePath
+    makeConvertedFilePath: makeConvertedFilePath,
+    makeConvertedAdditionalFilePath: makeConvertedAdditionalFilePath
   }
