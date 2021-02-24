@@ -48,12 +48,22 @@ module.exports.getDownloadUrl = async (event, context) => {
     if(job.ConversionStatuses[converter] && job.ConversionStatuses[converter].Successful) {
         const key = job.ConversionStatuses[converter].Key
         result.push(getDownloadPresigned(key))
+
+        // Include additional files
+        const additionalFiles = job.ConversionStatuses[converter].AdditionalFiles;
+        console.log(JSON.stringify(additionalFiles));
     }
   }
   else {
     for (const [key, value] of Object.entries(job.ConversionStatuses)) {
       if(value.Successful) {
           result.push(getDownloadPresigned(value.Key))
+
+          // Include additional files
+          const additionalFiles = value.AdditionalFiles;
+          for (const [fileName, filePath] of Object.entries(additionalFiles)) {
+            result.push(getDownloadPresigned(filePath))
+          }
       }
     }
   }

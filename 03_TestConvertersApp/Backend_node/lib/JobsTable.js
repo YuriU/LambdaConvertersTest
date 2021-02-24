@@ -152,8 +152,16 @@ class JobsTable {
             dict[key] = ({
                Successful: value["sucessful"],
                Key: value["key"]
-            })
+            });
+            
+            if(value["additionalFiles"]) {
+                dict[key].AdditionalFiles = {};
+                for (const [fileName, filePath] of Object.entries(value["additionalFiles"])) {
+                    dict[key].AdditionalFiles[fileName] = filePath;
+                }
+            }
         }
+
         return dict
     }
 };
