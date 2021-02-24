@@ -14,6 +14,7 @@ provider:
         - sns:Publish
       Resource:
         - { Ref: FileUploadedTopic }
+        - { Ref: ConversionResultExternalTopic }
     - Effect: Allow
       Action:
         - s3:DeleteObject
@@ -126,6 +127,7 @@ functions:
       CONVERSION_JOBS_TABLE_NAME: { Ref: ConversionJobsTable }
       RESULT_BUCKET_NAME: { Ref: ResultBucket }
       UPLOAD_RESULT_BUCKET_NAME: { Ref: UploadResultBucket }
+      CONVERSION_RESULT_EXTERNAL_TOPIC_ARN: { Ref: ConversionResultExternalTopic }
     events:
      - sqs:
          arn: !GetAtt ResultNotificationQueue.Arn
@@ -323,6 +325,8 @@ resources:
       Value: { Ref: ResultNotificationQueue }
     ResultNotificationQueueArn:
       Value: { "Fn::GetAtt": [ResultNotificationQueue, Arn] }
+    ConversionResultExternalTopic:
+      Value: { Ref: ConversionResultExternalTopic }
 
   Resources:
     UploadOriginalBucket:
@@ -361,6 +365,11 @@ resources:
 
     ResultNotificationQueue:
       Type: "AWS::SQS::Queue"
+
+    ConversionResultExternalTopic:
+      Type: "AWS::SNS::Topic"
+      Properties:
+        TopicName: "testconvertersapp-ConversionResultExternal"
 
     ConversionJobsTable:
       Type: "AWS::DynamoDB::Table"

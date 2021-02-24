@@ -43,7 +43,6 @@ module.exports.processResult = async (event, context) => {
         {
             try 
             {
-
                 const extension = result.ResultKey.split('.').pop(); 
                 const destinationKey = storageUtils.makeConvertedFilePath(jobId, fileName, result.Converter, '.' + extension)
 
@@ -81,6 +80,8 @@ module.exports.processResult = async (event, context) => {
         {
             await jobsTable.setConversionResult(jobId, result.Converter, result.Sucessful, "", {}, null)
         }
+
+        await publishConversionProcessedExternal(process.env.CONVERSION_RESULT_EXTERNAL_TOPIC_ARN, result.JobId, result.Converter);
     }   
 
     return {
@@ -164,6 +165,22 @@ const publishFileUploaded = async (topic, jobId, key) => {
 
     var params = {
         Message: JSON.stringify(fileUploadedEvent),
+        TopicArn: topic
+      };
+
+    await sns.publish(params).promise()
+}
+
+const publishConversionProcessedExternal = async (topic, jobId, converter) => {
+    const conversionProcessedEvent = {
+        JobId : jobId,
+        Converter: converter
+    }
+
+    console.log(JSON.stringify(conversionProcessedEvent));
+
+    var params = {
+        Message: JSON.stringify(conversionProcessedEvent),
         TopicArn: topic
       };
 
