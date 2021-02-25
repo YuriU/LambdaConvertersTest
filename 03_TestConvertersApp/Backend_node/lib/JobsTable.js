@@ -67,16 +67,18 @@ class JobsTable {
 
         const job = await dynamoDb.get({
             Key: { id: jobId },
-            AttributesToGet: ['id', 'fileName', 'started', 'original', 'conversionResults']
+            AttributesToGet: ['id', 'fileName', 'started', 'original', 'conversionResults', 'notifyExternal']
         }).promise()
 
+        
         if(job.Item) {
             return {
                 JobId : job.Item.id,
                 FileName: job.Item.fileName,
                 Started: +job.Item.started,
                 OriginalKey: job.Item["original"]["key"],
-                ConversionStatuses : this.statusesWithFilesToDictionary(job.Item.conversionResults)
+                ConversionStatuses : this.statusesWithFilesToDictionary(job.Item.conversionResults),
+                NotifyExternalTopic: job.Item["notifyExternal"]
             }
         }
         else {

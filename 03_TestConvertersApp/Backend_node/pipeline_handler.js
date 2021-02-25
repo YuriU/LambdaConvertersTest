@@ -81,7 +81,9 @@ module.exports.processResult = async (event, context) => {
             await jobsTable.setConversionResult(jobId, result.Converter, result.Sucessful, "", {}, null)
         }
 
-        await publishConversionProcessedExternal(process.env.CONVERSION_RESULT_EXTERNAL_TOPIC_ARN, result.JobId, result.Converter);
+        if(job.NotifyExternalTopic){
+            await publishConversionProcessedExternal(process.env.CONVERSION_RESULT_EXTERNAL_TOPIC_ARN, result.JobId, result.Converter);
+        }
     }   
 
     return {
@@ -118,8 +120,6 @@ const processFileUploaded =  async (record) => {
 
     await publishFileUploaded(process.env.FILE_UPLOADED_TOPIC_ARN, jobId, srcFilePath)
 }
-
-
 
 const moveToDestinationBucket = async (jobId, originalBucket, originalFileKey) => {
     const fileName = originalFileKey.split(/(\\|\/)/g).pop()
