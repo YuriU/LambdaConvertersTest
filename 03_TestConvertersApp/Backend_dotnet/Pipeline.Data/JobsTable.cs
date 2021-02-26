@@ -20,16 +20,30 @@ namespace Pipeline.Data
             _tableName = tableName;
         }
 
-        public async Task AddJob(string jobId, string fileName, DateTime started)
+        public async Task AddJob(string jobId, string fileName, DateTime started, bool notifyExternal, Dictionary<string, string> customAttributes = null)
         {
             var jsDateTime = (started.Ticks - new DateTime(1970, 1, 1).Ticks) / 10000;
-            await _dynamoDbClient.PutItemAsync(_tableName, new Dictionary<string, AttributeValue>()
+            var item = new Dictionary<string, AttributeValue>()
             {
-                { "id" , new AttributeValue  { S = jobId } },
-                { "fileName" , new AttributeValue { S = fileName } },
-                { "started" , new AttributeValue { N = jsDateTime.ToString() }}, 
-                { "conversionResults", new AttributeValue() { M = new AutoConstructedDictionary<string, AttributeValue> { }, IsMSet = true }}
-            });
+                {"id", new AttributeValue { S = jobId }},
+                {"fileName", new AttributeValue  {S = fileName }},
+                {"started", new AttributeValue { N = jsDateTime.ToString() }},
+                {"conversionResults", new AttributeValue() { M = new Dictionary<string, AttributeValue> { }, IsMSet = true }},
+                {"notifyExternal", new AttributeValue() { BOOL = notifyExternal }},
+                {"customAttributes", new AttributeValue() { M = new Dictionary<string, AttributeValue> { } }},
+            };
+
+            if (customAttributes != null)
+            {
+                item["customAttributes"] = new AttributeValue
+                {
+                    M = customAttributes.ToDictionary(
+                        kvp => kvp.Key,
+                        kvp => new AttributeValue() { S = kvp.Value })
+                }; 
+            }
+
+            await _dynamoDbClient.PutItemAsync(_tableName, item);
         }
         
         public async Task SetOriginalFile(string jobId, string originalFileKey = null, Exception exception = null)
@@ -100,12 +114,12 @@ namespace Pipeline.Data
         {
             var job = await _dynamoDbClient.GetItemAsync(new GetItemRequest
             {
-                Key = new Dictionary<string, AttributeValue> {{"id", new AttributeValue { S = jobId }}},
+                Key = new Dictionary<string, AttributeValue> { { "id", new AttributeValue { S = jobId } } },
                 TableName = _tableName,
-                AttributesToGet = new List<string> {"id", "fileName", "started", "original", "conversionResults"}
+                AttributesToGet = new List<string> { "id", "fileName", "started", "original", "conversionResults", "customAttributes" }
             });
 
-            if (job.Item != null)
+            if (job.Item != null && job.IsItemSet)
             {
                 return new ConversionJobFullInfo
                 {
@@ -118,8 +132,14 @@ namespace Pipeline.Data
                         p => new ConversionResult
                         {
                             Successful = p.Value.M["sucessful"].BOOL,
-                            Key = p.Value.M["key"].S
-                        })
+                            Key = p.Value.M["key"].S,
+                            AdditionalFiles = p.Value.M["additionalFiles"] != null 
+                                ? p.Value.M["additionalFiles"].M.ToDictionary(i => i.Key, i => i.Value.S)
+                                : null
+                        }),
+                    CustomAttributes = job.Item.ContainsKey("customAttributes")
+                        ? job.Item["customAttributes"].M.ToDictionary(i => i.Key, i => i.Value.S)
+                        : (Dictionary<string, string>)null
                 };
             }
             else

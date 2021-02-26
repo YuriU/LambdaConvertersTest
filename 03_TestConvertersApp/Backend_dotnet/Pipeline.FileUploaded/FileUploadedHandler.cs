@@ -42,7 +42,7 @@ namespace Pipeline.FileUploaded
                         
                         // Creating job in DB
                         var originalFileName = Path.GetFileName(originalFileKey);
-                        await _jobsTable.AddJob(jobId, originalFileName, DateTime.UtcNow);
+                        await _jobsTable.AddJob(jobId, originalFileName, DateTime.UtcNow, false, null);
                         
                         // Move file to dedicated job table
                         var srcFilePath = await MoveToDestinationBucket(jobId, record.S3.Bucket.Name, originalFileKey);

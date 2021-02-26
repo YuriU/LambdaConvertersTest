@@ -7,6 +7,8 @@ namespace Pipeline.Contracts
         public bool Successful { get; set; }
         
         public string Key { get; set; }
+        
+        public Dictionary<string, string> AdditionalFiles { get; set; }
     }
     
     public class ConversionJobFullInfo
@@ -20,5 +22,7 @@ namespace Pipeline.Contracts
         public long Started { get; set; }
         
         public Dictionary<string, ConversionResult> ConversionStatuses { get; set; }
+        
+        public Dictionary<string, string> CustomAttributes { get; set; }
     }
 }
