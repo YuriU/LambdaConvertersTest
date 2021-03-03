@@ -10,10 +10,10 @@ The orchestrator has 2 versions of backend
 It was originaly created with .net vesion, but because of long cold starts. NodeJs version was used as main
 Frontend was created using React
 
-To deploy run 
+* To deploy run 
 ./deploy.sh [-s Your stage]
 
-To create new cognito user, after deployment run
+* To create new cognito user, after deployment run
 ./create_user.sh -s your_stage user_name
 The password during creation will be MyTestPassword!2020
 Then change it on first login
