@@ -1,6 +1,6 @@
 # File conversion pipeline
 
-Showcase project of file conversion pipeline
+Showcase project of file conversion pipeline eg. image resize, file format change, encrypt, compile etc
 
 The main purpuse of the project was to build file conversion pipeline with ability to make conversion using several converters, then download combined result
 
