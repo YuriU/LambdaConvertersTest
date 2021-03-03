@@ -12,3 +12,8 @@ Frontend was created using React
 
 To deploy run 
 ./deploy.sh [-s Your stage]
+
+To create new cognito user, after deployment run
+./create_user.sh -s your_stage user_name
+The password during creation will be MyTestPassword!2020
+Then change it on first login
