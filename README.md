@@ -41,4 +41,13 @@ Serverless stacks for AWS Lambda based converters. Each stack consists of SQS qu
 
 Serverless stacks for StandAlone based converters.  Each stack consists of SQS queue, subscribed to FileUploaded topic.
 
+# How to deploy?
 
+To deploy new instance of pipeline, following steps must be taken:
+
+1. Deploy 03_TestConvertersApp stack which will create all the operation resources. All buckets, topics queue etc. Apart from that bogus Copy converter will be deployed.
+2. Create you own file converter using example from 02_Converters. Pipeline.CopyFileConverter or Pipeline.CopyFileConverterWithRuntime can be used depending on what base image is required
+3. Deploy just created converter to AWS ECR account, see instructions from 01_DockerImageTest
+4. Deploy converter stack using 04_LambdaConverterAppStack, adding custom stage where path to Docker image is specified
+
+Enjoy results
