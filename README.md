@@ -36,3 +36,9 @@ Frontend was created using ReactJs
 ## 04_LambdaConverterAppStack
 
 Serverless stacks for AWS Lambda based converters. Each stack consists of SQS queue, subscribed to FileUploaded topic and Docker based AWS lambda
+
+## 05_StandAloneConverterAppStack
+
+Serverless stacks for StandAlone based converters.  Each stack consists of SQS queue, subscribed to FileUploaded topic.
+
+
